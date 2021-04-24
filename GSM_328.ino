@@ -470,14 +470,14 @@ void Programacion(void)
       if (1 == sscanf(fonaNotificationBuffer, "+CMTI: " FONA_PREF_SMS_STORAGE ",%d", &slot)) 
         {
               Serial.print("slot: "); Serial.println(slot);      
-              char callerIDbuffer[32];  // almacenaremos el número del remitente del SMS aquí
+              char callerIDbuffer[15];  // almacenaremos el número del remitente del SMS aquí
       
-          if (! fona.getSMSSender(slot, callerIDbuffer, 31)) // Recuperar la dirección / número de teléfono del remitente de SMS.
+          if (! fona.getSMSSender(slot, callerIDbuffer, 15)) // Recuperar la dirección / número de teléfono del remitente de SMS.
               {
               Serial.println("Didn't find SMS message in slot!");
               }
-              Serial.print(F("FROM: ")); Serial.println(callerIDbuffer); // F Siginfica guardar cadena en memoria flash     
-              uint16_t smslen; // Recuperar valor de SMS.
+                Serial.print(F("FROM: ")); Serial.println(callerIDbuffer); // F Siginfica guardar cadena en memoria flash     
+                uint16_t smslen; // Recuperar valor de SMS.
           if (fona.readSMS(slot, smsBuffer, 250, &smslen)) // ¡pasa el búfer y el máximo len!
               { 
                 Serial.println(smsBuffer);
@@ -485,17 +485,17 @@ void Programacion(void)
               }
           if (fona.deleteSMS(slot)) //eliminar el mensaje original después de que se procese
               {
-              delay(20);
-              Serial.println(F("MENSAJE BORRADO"));
-              } else {
-              Serial.print(F("NO SE PUDO BORRAR EL MENSAJE")); Serial.println(slot);
-              fona.print(F("AT+CMGD=?\r\n"));
+                delay(20);
+                Serial.println(F("MENSAJE BORRADO"));
+                } else {
+                Serial.print(F("NO SE PUDO BORRAR EL MENSAJE")); Serial.println(slot);
+                fona.print(F("AT+CMGD=?\r\n"));
               }  
           if (!fona.sendSMS(callerIDbuffer, "COMANDO RECIBIDO")) // Enviar una respuesta automática
               {
-              Serial.println(F("Confirmacion Enviada"));
+                Serial.println(F("Confirmacion Enviada"));
               } else {
-              Serial.println(F("No se envio confirmacion"));
+               Serial.println(F("No se envio confirmacion"));
             }      
        }
   }
@@ -504,14 +504,14 @@ void Programacion(void)
 
  
           if (Recibir.startsWith("D", 0)) // registrar cantidad de destinatarios
-             {
+            {
               Recibir.remove(0, 1);              
               EEPROM.write(141,Recibir[0]);                          
               Serial.println("Cantidad de Destinos");
               Serial.println(Recibir);
               Recibir= "SALIR";
               delay(1000);
-              }
+            }
           
           if (Recibir.startsWith("1", 0)) // registrar destino 1
           {
