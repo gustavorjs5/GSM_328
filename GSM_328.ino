@@ -247,7 +247,7 @@ void loop()
          { 
           Serial.println(smsBuffer);
           Recibir = smsBuffer;              
-        }
+         }
 
         
         if (fona.deleteSMS(slot)) //eliminar el mensaje original después de que se procese
@@ -278,7 +278,7 @@ void loop()
 //}
 
   if (Recibir == "OUT1/ON" )
-  {
+   {
    digitalWrite(RELE_1, HIGH);
    Serial.println(Recibir);
    Recibir ="SALIR"; 
@@ -452,53 +452,52 @@ void Programacion(void)
   if (fona.available())      //¿Algún dato disponible del FONA?
   {
     int slot = 0;            //este será el número de ranura del SMS
-    int charCount = 0;
-   // Leer la notificación en fonaInBuffer
-    do  {
+    int charCount = 0; 
+    do  
+    { // Leer la notificación en fonaInBuffer
       *bufPtr = fona.read();
       Serial.write(*bufPtr);
       delay(1);
-    } while ((*bufPtr++ != '\n') && (fona.available()) && (++charCount < (sizeof(fonaNotificationBuffer)-1)));
+    } 
     
-    // Agrega un terminal NULL a la cadena de notificación
-    *bufPtr = 0;
+    while ((*bufPtr++ != '\n') && (fona.available()) && (++charCount < (sizeof(fonaNotificationBuffer)-1)));
+    
+    *bufPtr = 0; // Agrega un terminal NULL a la cadena de notificación
 
     // Escanea la cadena de notificación en busca de una notificación recibida por SMS.
     // Si es un mensaje SMS, obtendremos el número de ranura en 'ranura'
     
-    if (1 == sscanf(fonaNotificationBuffer, "+CMTI: " FONA_PREF_SMS_STORAGE ",%d", &slot)) {
-      Serial.print("slot: "); Serial.println(slot);
+      if (1 == sscanf(fonaNotificationBuffer, "+CMTI: " FONA_PREF_SMS_STORAGE ",%d", &slot)) 
+        {
+              Serial.print("slot: "); Serial.println(slot);      
+              char callerIDbuffer[32];  // almacenaremos el número del remitente del SMS aquí
       
-      char callerIDbuffer[32];  // almacenaremos el número del remitente del SMS aquí
- 
-      if (! fona.getSMSSender(slot, callerIDbuffer, 31)) // Recuperar la dirección / número de teléfono del remitente de SMS.
-      {
-        Serial.println("Didn't find SMS message in slot!");
-      }
-         Serial.print(F("FROM: ")); Serial.println(callerIDbuffer); // F Siginfica guardar cadena en memoria flash
-      
-          uint16_t smslen; // Recuperar valor de SMS.
-         if (fona.readSMS(slot, smsBuffer, 250, &smslen)) // ¡pasa el búfer y el máximo len!
-         { 
-          Serial.println(smsBuffer);
-          Recibir = smsBuffer;              
-        }
-              if (fona.deleteSMS(slot)) //eliminar el mensaje original después de que se procese
-      {
-        delay(20);
-        Serial.println(F("MENSAJE BORRADO"));
-      } else {
-        Serial.print(F("NO SE PUDO BORRAR EL MENSAJE")); Serial.println(slot);
-        fona.print(F("AT+CMGD=?\r\n"));
-      }
-  
-      if (!fona.sendSMS(callerIDbuffer, "COMANDO RECIBIDO")) // Enviar una respuesta automática
-      {
-        Serial.println(F("Confirmacion Enviada"));
-      } else {
-        Serial.println(F("No se envio confirmacion"));
-      }      
-    }
+          if (! fona.getSMSSender(slot, callerIDbuffer, 31)) // Recuperar la dirección / número de teléfono del remitente de SMS.
+              {
+              Serial.println("Didn't find SMS message in slot!");
+              }
+              Serial.print(F("FROM: ")); Serial.println(callerIDbuffer); // F Siginfica guardar cadena en memoria flash     
+              uint16_t smslen; // Recuperar valor de SMS.
+          if (fona.readSMS(slot, smsBuffer, 250, &smslen)) // ¡pasa el búfer y el máximo len!
+              { 
+                Serial.println(smsBuffer);
+                Recibir = smsBuffer;              
+              }
+          if (fona.deleteSMS(slot)) //eliminar el mensaje original después de que se procese
+              {
+              delay(20);
+              Serial.println(F("MENSAJE BORRADO"));
+              } else {
+              Serial.print(F("NO SE PUDO BORRAR EL MENSAJE")); Serial.println(slot);
+              fona.print(F("AT+CMGD=?\r\n"));
+              }  
+          if (!fona.sendSMS(callerIDbuffer, "COMANDO RECIBIDO")) // Enviar una respuesta automática
+              {
+              Serial.println(F("Confirmacion Enviada"));
+              } else {
+              Serial.println(F("No se envio confirmacion"));
+            }      
+       }
   }
 
 
