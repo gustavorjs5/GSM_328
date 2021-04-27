@@ -28,12 +28,32 @@
 #define EE_DESTINATARIO_9  112
 #define EE_DESTINATARIO_10 126
 #define EE_CANTIDAD_DESTINOS 141
+#define EE_TIEMPO_OUT1_1 142
+#define EE_TIEMPO_OUT1_2 143
+#define EE_TIEMPO_OUT2_1 144
+#define EE_TIEMPO_OUT2_2 145
+#define EE_TIEMPO_OUT3_1 146
+#define EE_TIEMPO_OUT3_2 147
+#define EE_TIEMPO_OUT4_1 148
+#define EE_TIEMPO_OUT4_2 149
+#define EE_OUT1_TEMPORIZADA 150
+#define EE_OUT2_TEMPORIZADA 151
+#define EE_OUT3_TEMPORIZADA 152
+#define EE_OUT4_TEMPORIZADA 153
 
 unsigned int Estado_Equipo;
+unsigned int TEMPORIZADOR_OUT1;
+unsigned int TEMPORIZADOR_OUT2;
+unsigned int TEMPORIZADOR_OUT3;
+unsigned int TEMPORIZADOR_OUT4;
+unsigned int TIEMPO_OUT1;
+unsigned int TIEMPO_OUT2;
+unsigned int TIEMPO_OUT3;
+unsigned int TIEMPO_OUT4;
 unsigned char i;
 unsigned int CANTIDAD_DESTINOS; 
 unsigned char VALOR;  
-unsigned char DESTINATARIO_1[15];  
+char DESTINATARIO_1[15];  
 unsigned char DESTINATARIO_2[15];  
 unsigned char DESTINATARIO_3[15];  
 unsigned char DESTINATARIO_4[15];  
@@ -43,18 +63,20 @@ unsigned char DESTINATARIO_7[15];
 unsigned char DESTINATARIO_8[15];  
 unsigned char DESTINATARIO_9[15];  
 unsigned char DESTINATARIO_10[15];  
-unsigned char DESTINOS[10][15]; // 10 destinatarios con un maximo de 14 caracteres
+char DESTINOS[10][15]; // 10 destinatarios con un maximo de 14 caracteres
 char replybuffer[50];                    //este es un gran búfer para las respuestas
-char fonaNotificationBuffer[64];          //para notificaciones del FONA
-char smsBuffer[50];
+char fonaNotificationBuffer[30];          // 64 para notificaciones del FONA
+char smsBuffer[20];
 bool ESTADO_LED = 1;
 bool ESTADO_ANTERIOR_IN1;
 bool ESTADO_ANTERIOR_IN2;
 bool PROGRAMACION=0;
 bool bG_PrimeraEntrada;  
+bool OUT1_TEMPORIZADA;
+bool OUT2_TEMPORIZADA;
+bool OUT3_TEMPORIZADA;
+bool OUT4_TEMPORIZADA;
       
-String Configuracion = "CONEXION";
-
 String Recibir;
 SoftwareSerial swseri = SoftwareSerial(CONFIG_GSM_RXPIN, CONFIG_GSM_TXPIN);
 Adafruit_FONA fona = Adafruit_FONA(10);// OBJETO ADAFRUIT_FONA USADO PARA COMUNICARSE CON EL SIM800L
@@ -77,7 +99,7 @@ void setup()
   swseri.begin(9600);
   Serial.begin(9600);
   
-  Timer1.initialize(100000);                   // Dispara cada 100 ms
+  Timer1.initialize(1000000);                   // Dispara cada 100 ms
   Timer1.attachInterrupt(Timer100ms);           // Activa la interrupcion y la asocia a Timer100ms 
   ESTADO_ANTERIOR_IN1 = HIGH;
   ESTADO_ANTERIOR_IN2 = HIGH;
@@ -100,10 +122,10 @@ void setup()
 //    Serial.println(F("ERROR"));
 //  }
 int j;
-//for (j=0;j<21;j++)
-//{
-//fona.deleteSMS(j);
-//}
+for (j=0;j<21;j++)
+{
+fona.deleteSMS(j);
+}
   swseri.print("AT+CNMI=2,1\r\n");  //configurar el FONA para enviar una notificación + CMTI cuando se reciba un SMS
   Serial.println("Equipo Listo ");
   bG_PrimeraEntrada=true;
@@ -121,16 +143,16 @@ void loop()
     // wdt_disable();//DESACTIVO PERRO GUARDION
      InicializarVariables();
      bG_PrimeraEntrada = false;
-     
     }
 
  
-       if (Estado_Equipo> 10) // CADA 5 SEGUNDOS CAMBIA ESTADO DE LED
+       if (Estado_Equipo> 5) // ESTADO DEL EQUIPO CADA 5 SEGUNDOS CAMBIA ESTADO DE LED
          {
           Estado_Equipo=0;
           ESTADO_LED = !ESTADO_LED;
           digitalWrite( LED_AUX,ESTADO_LED);
          }
+
 
  if (digitalRead(IN1)==LOW && (ESTADO_ANTERIOR_IN1)== HIGH)
     {
@@ -158,7 +180,7 @@ void loop()
           delay(10);
         if (digitalRead(IN1)==HIGH && (ESTADO_ANTERIOR_IN1)==LOW) 
            {     
-          if (!fona.sendSMS(DESTINATARIO_1, "ENTRADA 1 DESACTIVA")) 
+          if (!fona.sendSMS(DESTINOS[i], "ENTRADA 1 DESACTIVA")) 
             {
             Serial.println(F("ENVIADO"));
             } else {
@@ -207,7 +229,132 @@ void loop()
            }
         }
 
-  char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
+ 
+//
+//switch (Recibir)
+//{
+//  case 'OUT1/ON':
+//  {
+//    Serial.println(Recibir); 
+//  }
+//}
+
+
+  else if (Recibir == "CONECTAR")
+  {
+   PROGRAMACION=true;
+   Serial.println(Recibir); 
+  }
+  else if (Recibir == "OUT1/ON" )
+   {
+   digitalWrite(RELE_1, HIGH);
+   Serial.println(Recibir);
+   TEMPORIZADOR_OUT1=0;
+   Recibir ="SALIR"; 
+  }
+
+   else if (Recibir == "OUT1/OFF" )
+  {
+   digitalWrite(RELE_1, LOW);
+   Serial.println(Recibir);
+   Recibir ="SALIR"; 
+  }
+   else if (Recibir == "OUT2/ON" )
+  {
+   digitalWrite(RELE_2, HIGH);
+   Serial.println(Recibir);
+   TEMPORIZADOR_OUT2=0;
+   Recibir ="SALIR"; 
+  }
+
+    else if (Recibir == "OUT2/OFF" )
+  {
+   digitalWrite(RELE_2, LOW);
+   Serial.println(Recibir);
+   Recibir ="SALIR"; 
+  }
+
+   else if (Recibir == "OUT3/ON" )
+  {
+   digitalWrite(RELE_3, HIGH);
+   Serial.println(Recibir);
+   TEMPORIZADOR_OUT3=0;
+   Recibir ="SALIR"; 
+  }
+
+   else  if (Recibir == "OUT3/OFF" )
+  {
+   digitalWrite(RELE_3, LOW);
+   Serial.println(Recibir);
+   Recibir ="SALIR"; 
+  }
+
+   else  if (Recibir == "OUT4/ON" )
+  {
+   digitalWrite(RELE_4, HIGH);
+   Serial.println(Recibir);
+   TEMPORIZADOR_OUT4=0;
+   Recibir ="SALIR"; 
+  }
+   else  if (Recibir == "OUT4/OFF" )
+  {
+   digitalWrite(RELE_4, LOW);
+   Serial.println(Recibir);
+   Recibir ="SALIR"; 
+  }
+    else if (Recibir == "OUTS/ON" )
+  {
+   digitalWrite(RELE_1, HIGH);
+   digitalWrite(RELE_2, HIGH);
+   digitalWrite(RELE_3, HIGH);
+   digitalWrite(RELE_4, HIGH);
+   TEMPORIZADOR_OUT1=0;
+   TEMPORIZADOR_OUT2=0;
+   TEMPORIZADOR_OUT3=0;
+   TEMPORIZADOR_OUT4=0;
+   Serial.println(Recibir);
+   Recibir ="SALIR"; 
+  }
+   else  if (Recibir == "OUTS/OFF" )
+  {
+   digitalWrite(RELE_1, LOW);
+   digitalWrite(RELE_2, LOW);
+   digitalWrite(RELE_3, LOW);
+   digitalWrite(RELE_4, LOW);
+   Serial.println(Recibir);
+   Recibir ="SALIR"; 
+  }
+
+    else if (OUT1_TEMPORIZADA  == true && TEMPORIZADOR_OUT1 > TIEMPO_OUT1)
+   {
+   digitalWrite(RELE_1, LOW);
+   TEMPORIZADOR_OUT1=0;
+   Recibir ="SALIR"; 
+   }
+
+   else if (OUT2_TEMPORIZADA  == true && TEMPORIZADOR_OUT2 > TIEMPO_OUT2)
+   {
+   digitalWrite(RELE_2, LOW);
+   TEMPORIZADOR_OUT2=0;
+   Recibir ="SALIR"; 
+   }
+
+   else if (OUT3_TEMPORIZADA  == true && TEMPORIZADOR_OUT3 > TIEMPO_OUT3 )
+   {
+   digitalWrite(RELE_3, LOW);
+   TEMPORIZADOR_OUT3=0;
+   Recibir ="SALIR"; 
+   }
+  else  if (OUT4_TEMPORIZADA  == true && TEMPORIZADOR_OUT4 > TIEMPO_OUT4 )
+   {
+   digitalWrite(RELE_4, LOW);
+   TEMPORIZADOR_OUT4=0;
+   Recibir ="SALIR"; 
+   }
+
+
+
+ char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
   
   if (fona.available())      //¿Algún dato disponible del FONA?
   {
@@ -230,7 +377,7 @@ void loop()
     {
       Serial.print("slot: "); Serial.println(slot);
       
-      char callerIDbuffer[32];  // almacenaremos el número del remitente del SMS aquí
+      char callerIDbuffer[20];  // almacenaremos el número del remitente del SMS aquí
 
 
  
@@ -243,7 +390,7 @@ void loop()
 
      
           uint16_t smslen; // Recuperar valor de SMS.
-         if (fona.readSMS(slot, smsBuffer, 250, &smslen)) // ¡pasa el búfer y el máximo len!
+         if (fona.readSMS(slot, smsBuffer, 30, &smslen)) // ¡pasa el búfer y el máximo len!
          { 
           Serial.println(smsBuffer);
           Recibir = smsBuffer;              
@@ -268,92 +415,10 @@ void loop()
 
     }
   }
-//
-//switch (Recibir)
-//{
-//  case 'OUT1/ON':
-//  {
-//    Serial.println(Recibir); 
-//  }
-//}
 
-  if (Recibir == "OUT1/ON" )
-   {
-   digitalWrite(RELE_1, HIGH);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
 
-    if (Recibir == "OUT1/OFF" )
-  {
-   digitalWrite(RELE_1, LOW);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
-    if (Recibir == "OUT2/ON" )
-  {
-   digitalWrite(RELE_2, HIGH);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
 
-    if (Recibir == "OUT2/OFF" )
-  {
-   digitalWrite(RELE_2, LOW);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
 
-    if (Recibir == "OUT3/ON" )
-  {
-   digitalWrite(RELE_3, HIGH);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
-
-    if (Recibir == "OUT3/OFF" )
-  {
-   digitalWrite(RELE_3, LOW);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
-
-    if (Recibir == "OUT4/ON" )
-  {
-   digitalWrite(RELE_4, HIGH);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
-    if (Recibir == "OUT4/OFF" )
-  {
-   digitalWrite(RELE_4, LOW);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
-    if (Recibir == "OUTS/ON" )
-  {
-   digitalWrite(RELE_1, HIGH);
-   digitalWrite(RELE_2, HIGH);
-   digitalWrite(RELE_3, HIGH);
-   digitalWrite(RELE_4, HIGH);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
-    if (Recibir == "OUTS/OFF" )
-  {
-   digitalWrite(RELE_1, LOW);
-   digitalWrite(RELE_2, LOW);
-   digitalWrite(RELE_3, LOW);
-   digitalWrite(RELE_4, LOW);
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
-  }
-
-  if (Recibir == "CONECTAR")
-  {
-   PROGRAMACION=true;
-   Serial.println(Recibir); 
-  }
 }
 
  else
@@ -375,6 +440,10 @@ void loop()
   {
 
      Estado_Equipo++;
+     TEMPORIZADOR_OUT1++;
+     TEMPORIZADOR_OUT2++;
+     TEMPORIZADOR_OUT3++;
+     TEMPORIZADOR_OUT4++;
   }
 
 
@@ -392,6 +461,23 @@ r_eeprom(DESTINATARIO_7, EE_DESTINATARIO_7, 14);
 r_eeprom(DESTINATARIO_8, EE_DESTINATARIO_8, 14);
 r_eeprom(DESTINATARIO_9, EE_DESTINATARIO_9, 14);
 r_eeprom(DESTINATARIO_10, EE_DESTINATARIO_10,14);
+OUT1_TEMPORIZADA = EEPROM.read(EE_OUT1_TEMPORIZADA);
+OUT2_TEMPORIZADA = EEPROM.read(EE_OUT2_TEMPORIZADA);
+OUT3_TEMPORIZADA = EEPROM.read(EE_OUT3_TEMPORIZADA);
+OUT4_TEMPORIZADA = EEPROM.read(EE_OUT4_TEMPORIZADA);
+
+byte OUT1_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT1_1);
+byte OUT1_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT1_2);
+byte SUMA_OUT1_TIEMPO [2] = {OUT1_TIEMPO_2, OUT1_TIEMPO_1};
+Serial.println(OUT1_TIEMPO_1,DEC);
+Serial.println(OUT1_TIEMPO_2,DEC);
+ObtenerValor(SUMA_OUT1_TIEMPO, 0);
+TIEMPO_OUT1 = ObtenerValor(SUMA_OUT1_TIEMPO, 0);
+Serial.println(TIEMPO_OUT1,DEC);
+Serial.println(OUT1_TEMPORIZADA,DEC);
+Serial.println(OUT2_TEMPORIZADA,DEC);
+Serial.println(OUT3_TEMPORIZADA,DEC);
+Serial.println(OUT4_TEMPORIZADA,DEC);
 
 unsigned a,b,c,d,e,f,g,h,i;
 
@@ -434,10 +520,6 @@ Serial.println();
      DESTINOS[9][d]=DESTINATARIO_10[d];
     }
 
-//for (e=0;e<14;e++)
-//{
-//Serial.print(char(DESTINOS[1][e]));
-//}
  return;
   
 }
@@ -478,7 +560,7 @@ void Programacion(void)
               }
                 Serial.print(F("FROM: ")); Serial.println(callerIDbuffer); // F Siginfica guardar cadena en memoria flash     
                 uint16_t smslen; // Recuperar valor de SMS.
-          if (fona.readSMS(slot, smsBuffer, 250, &smslen)) // ¡pasa el búfer y el máximo len!
+          if (fona.readSMS(slot, smsBuffer, 50, &smslen)) // ¡pasa el búfer y el máximo len!
               { 
                 Serial.println(smsBuffer);
                 Recibir = smsBuffer;              
@@ -516,7 +598,7 @@ void Programacion(void)
           if (Recibir.startsWith("1", 0)) // registrar destino 1
           {
               Recibir.remove(0, 1); 
-              
+              // w_eeprom(EE_DESTINATARIO_1 ,Recibir, 14);
               for(i=0;i<14;i++)
               {             
                 EEPROM.write(i,Recibir[i]);            
@@ -629,6 +711,78 @@ void Programacion(void)
               Serial.println(Recibir);
               delay(1000);
               }
+             if (Recibir == "OUT1/TEMP/ON")
+              {
+              EEPROM.write(EE_OUT1_TEMPORIZADA, 1);
+              Recibir == "SALIR"; 
+              }
+              if (Recibir == "OUT1/TEMP/OFF")
+              {
+              EEPROM.write(EE_OUT1_TEMPORIZADA, 0);
+              Recibir == "SALIR"; 
+              }
+             if (Recibir == "OUT2/TEMP/ON")
+              {
+              EEPROM.write(EE_OUT2_TEMPORIZADA, 1);
+              Recibir == "SALIR"; 
+              }
+              if (Recibir == "OUT2/TEMP/OFF")
+              {
+              EEPROM.write(EE_OUT2_TEMPORIZADA, 0);
+              Recibir == "SALIR"; 
+              }
+              if (Recibir == "OUT3/TEMP/ON")
+              {
+              EEPROM.write(EE_OUT3_TEMPORIZADA, 1);
+              Recibir == "SALIR"; 
+              }
+              if (Recibir == "OUT3/TEMP/OFF")
+              {
+              EEPROM.write(EE_OUT3_TEMPORIZADA, 0);
+              Recibir == "SALIR"; 
+              }
+              if (Recibir == "OUT4/TEMP/ON")
+              {
+              EEPROM.write(EE_OUT4_TEMPORIZADA, 1);
+              Recibir == "SALIR"; 
+              }
+              if (Recibir == "OUT4/TEMP/OFF")
+              {
+              EEPROM.write(EE_OUT4_TEMPORIZADA, 0);
+              Recibir == "SALIR"; 
+              }
+
+           if (Recibir.startsWith("T1/", 0)) // Tiempo de temporizado de la salida 1
+            {
+              Recibir.remove(0, 3);
+              unsigned int OUT1_TIEMPO;
+              OUT1_TIEMPO = Recibir.toInt();            
+              Serial.println(OUT1_TIEMPO);
+              byte OUT1_1;
+              byte OUT1_2;
+              OUT1_1 = OUT1_TIEMPO & 0XFF;
+              OUT1_2 = OUT1_TIEMPO >>8&0XFF;
+              EEPROM.write(EE_TIEMPO_OUT1_1, OUT1_1);
+              EEPROM.write(EE_TIEMPO_OUT1_2, OUT1_2);
+              Recibir= "SALIR";
+              delay(1000);
+            }
+            
+           if (Recibir.startsWith("T2/", 0)) // Tiempo de temporizado de la salida 2
+            {
+              Recibir.remove(0, 3);
+              unsigned int OUT2_TIEMPO;
+              OUT2_TIEMPO = Recibir.toInt();            
+              Serial.println(OUT2_TIEMPO);
+              byte OUT2_1;
+              byte OUT2_2;
+              OUT2_1 = OUT2_TIEMPO & 0XFF;
+              OUT2_2 = OUT2_TIEMPO >>8&0XFF;
+              EEPROM.write(EE_TIEMPO_OUT2_1, OUT2_1);
+              EEPROM.write(EE_TIEMPO_OUT2_2, OUT2_2);
+              Recibir= "SALIR";
+              delay(1000);
+            }
       
              if (Recibir == "DESCONECTAR" )
               {
@@ -636,6 +790,7 @@ void Programacion(void)
                Serial.println(Recibir);
                Recibir == "SALIR"; 
               }
+
   }
 }
 
@@ -656,4 +811,13 @@ void r_eeprom(unsigned char *pDato, unsigned char DirEE, unsigned char cL_Cantid
     *(pDato+i)=EEPROM.read(DirEE+i);
   }
   return;
+}
+
+unsigned int ObtenerValor(byte paquete [], byte i)
+{
+
+  unsigned int valor;
+  valor = (valor * 256)+ paquete [i];
+  valor = (valor * 256)+ paquete [i+1];
+  return valor;
 }
