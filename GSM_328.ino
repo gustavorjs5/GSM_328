@@ -471,8 +471,23 @@ byte OUT1_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT1_2);
 byte SUMA_OUT1_TIEMPO [2] = {OUT1_TIEMPO_2, OUT1_TIEMPO_1};
 Serial.println(OUT1_TIEMPO_1,DEC);
 Serial.println(OUT1_TIEMPO_2,DEC);
-ObtenerValor(SUMA_OUT1_TIEMPO, 0);
 TIEMPO_OUT1 = ObtenerValor(SUMA_OUT1_TIEMPO, 0);
+
+byte OUT2_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT2_1);
+byte OUT2_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT2_2);
+byte SUMA_OUT2_TIEMPO [2] = {OUT2_TIEMPO_2, OUT2_TIEMPO_1};
+TIEMPO_OUT2 = ObtenerValor(SUMA_OUT2_TIEMPO, 0);
+
+byte OUT3_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT3_1);
+byte OUT3_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT3_2);
+byte SUMA_OUT3_TIEMPO [2] = {OUT3_TIEMPO_2, OUT3_TIEMPO_1};
+TIEMPO_OUT3 = ObtenerValor(SUMA_OUT3_TIEMPO, 0);
+
+byte OUT4_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT4_1);
+byte OUT4_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT4_2);
+byte SUMA_OUT4_TIEMPO [2] = {OUT4_TIEMPO_2, OUT4_TIEMPO_1};
+TIEMPO_OUT4 = ObtenerValor(SUMA_OUT4_TIEMPO, 0);
+
 Serial.println(TIEMPO_OUT1,DEC);
 Serial.println(OUT1_TEMPORIZADA,DEC);
 Serial.println(OUT2_TEMPORIZADA,DEC);
@@ -780,6 +795,38 @@ void Programacion(void)
               OUT2_2 = OUT2_TIEMPO >>8&0XFF;
               EEPROM.write(EE_TIEMPO_OUT2_1, OUT2_1);
               EEPROM.write(EE_TIEMPO_OUT2_2, OUT2_2);
+              Recibir= "SALIR";
+              delay(1000);
+            }
+
+            if (Recibir.startsWith("T3/", 0)) // Tiempo de temporizado de la salida 3
+            {
+              Recibir.remove(0, 3);
+              unsigned int OUT3_TIEMPO;
+              OUT3_TIEMPO = Recibir.toInt();            
+              Serial.println(OUT3_TIEMPO);
+              byte OUT3_1;
+              byte OUT3_2;
+              OUT3_1 = OUT3_TIEMPO & 0XFF;
+              OUT3_2 = OUT3_TIEMPO >>8&0XFF;
+              EEPROM.write(EE_TIEMPO_OUT3_1, OUT3_1);
+              EEPROM.write(EE_TIEMPO_OUT3_2, OUT3_2);
+              Recibir= "SALIR";
+              delay(1000);
+            }
+
+             if (Recibir.startsWith("T4/", 0)) // Tiempo de temporizado de la salida 4
+            {
+              Recibir.remove(0, 3);
+              unsigned int OUT4_TIEMPO;
+              OUT4_TIEMPO = Recibir.toInt();            
+              Serial.println(OUT4_TIEMPO);
+              byte OUT4_1;
+              byte OUT4_2;
+              OUT4_1 = OUT4_TIEMPO & 0XFF;
+              OUT4_2 = OUT4_TIEMPO >>8&0XFF;
+              EEPROM.write(EE_TIEMPO_OUT4_1, OUT4_1);
+              EEPROM.write(EE_TIEMPO_OUT4_2, OUT4_2);
               Recibir= "SALIR";
               delay(1000);
             }
