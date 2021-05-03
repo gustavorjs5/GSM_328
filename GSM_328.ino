@@ -246,49 +246,49 @@ void loop()
     Recibir ="SALIR";    
   }
 
-    if (Recibir == "OUT2A/VALOR")
-  {
-      char callerIDbuffer[20];
-      int valor=analogRead(A0);
-      char cstr[16];
-      itoa(valor, cstr, 10);
-        if (!fona.sendSMS(callerIDbuffer,cstr)) 
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-        }  
-    Recibir ="SALIR";    
-  }
-  if (Recibir == "OUT3A/VALOR")
-  {
-      char callerIDbuffer[20];
-      int valor=analogRead(A7);
-      char cstr[16];
-      itoa(valor, cstr, 10);
-        if (!fona.sendSMS(callerIDbuffer,cstr)) 
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-        }  
-    Recibir ="SALIR";    
-  }
-
-    if (Recibir == "OUT4A/VALOR")
-  {
-      char callerIDbuffer[20];
-      int valor=analogRead(A6);
-      char cstr[16];
-      itoa(valor, cstr, 10);
-        if (!fona.sendSMS(callerIDbuffer,cstr)) 
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-        }  
-    Recibir ="SALIR";    
-  }
+//    if (Recibir == "OUT2A/VALOR")
+//  {
+//      char callerIDbuffer[20];
+//      int valor=analogRead(A0);
+//      char cstr[16];
+//      itoa(valor, cstr, 10);
+//        if (!fona.sendSMS(callerIDbuffer,cstr)) 
+//       {
+//        Serial.println(F("Confirmacion Enviada"));
+//        } else {
+//        Serial.println(F("No se envio confirmacion"));
+//        }  
+//    Recibir ="SALIR";    
+//  }
+//  if (Recibir == "OUT3A/VALOR")
+//  {
+//      char callerIDbuffer[20];
+//      int valor=analogRead(A7);
+//      char cstr[16];
+//      itoa(valor, cstr, 10);
+//        if (!fona.sendSMS(callerIDbuffer,cstr)) 
+//       {
+//        Serial.println(F("Confirmacion Enviada"));
+//        } else {
+//        Serial.println(F("No se envio confirmacion"));
+//        }  
+//    Recibir ="SALIR";    
+//  }
+//
+//    if (Recibir == "OUT4A/VALOR")
+//  {
+//      char callerIDbuffer[20];
+//      int valor=analogRead(A6);
+//      char cstr[16];
+//      itoa(valor, cstr, 10);
+//        if (!fona.sendSMS(callerIDbuffer,cstr)) 
+//       {
+//        Serial.println(F("Confirmacion Enviada"));
+//        } else {
+//        Serial.println(F("No se envio confirmacion"));
+//        }  
+//    Recibir ="SALIR";    
+//  }
   else if (Recibir == "CONECTAR")
   {
    PROGRAMACION=true;
