@@ -42,7 +42,7 @@
 #define EE_OUT3_TEMPORIZADA 152
 #define EE_OUT4_TEMPORIZADA 153
 
-unsigned int Estado_Equipo;
+unsigned char Estado_Equipo;
 unsigned int TEMPORIZADOR_OUT1;
 unsigned int TEMPORIZADOR_OUT2;
 unsigned int TEMPORIZADOR_OUT3;
@@ -52,22 +52,22 @@ unsigned int TIEMPO_OUT2;
 unsigned int TIEMPO_OUT3;
 unsigned int TIEMPO_OUT4;
 unsigned char i;
-unsigned int CANTIDAD_DESTINOS; 
+unsigned char CANTIDAD_DESTINOS; 
 unsigned char VALOR;  
-const unsigned char DESTINATARIO_1[15] PROGMEM="";  
-const unsigned char DESTINATARIO_2[15] PROGMEM="";  
-const unsigned char DESTINATARIO_3[15]PROGMEM="";  
-const unsigned char DESTINATARIO_4[15]PROGMEM="";  
-const unsigned char DESTINATARIO_5[15]PROGMEM="";  
-const unsigned char DESTINATARIO_6[15]PROGMEM="";  
-const unsigned char DESTINATARIO_7[15]PROGMEM="";  
-const unsigned char DESTINATARIO_8[15]PROGMEM="";  
-const unsigned char DESTINATARIO_9[15]PROGMEM="";  
-const unsigned char DESTINATARIO_10[15]PROGMEM="";  
+unsigned char DESTINATARIO_1[15];  
+unsigned char DESTINATARIO_2[15];  
+unsigned char DESTINATARIO_3[15];  
+unsigned char DESTINATARIO_4[15];  
+unsigned char DESTINATARIO_5[15];  
+unsigned char DESTINATARIO_6[15];  
+unsigned char DESTINATARIO_7[15];  
+unsigned char DESTINATARIO_8[15];  
+unsigned char DESTINATARIO_9[15];  
+unsigned char DESTINATARIO_10[15];  
 char DESTINOS[10][15]; // 10 destinatarios con un maximo de 14 caracteres
-char replybuffer[25];                    //este es un gran búfer para las respuestas
-char fonaNotificationBuffer[20];          // 64 para notificaciones del FONA
-char smsBuffer[20];
+char replybuffer[30];                    //este es un gran búfer para las respuestas
+char fonaNotificationBuffer[30];          // 64 para notificaciones del FONA
+char smsBuffer[60];
 bool ESTADO_LED = 1;
 bool ESTADO_ANTERIOR_IN1;
 bool ESTADO_ANTERIOR_IN2;
@@ -77,11 +77,10 @@ bool OUT1_TEMPORIZADA;
 bool OUT2_TEMPORIZADA;
 bool OUT3_TEMPORIZADA;
 bool OUT4_TEMPORIZADA;
-static char callerIDbuffer[20];     
+static char callerIDbuffer[15];     
 String Recibir;
 SoftwareSerial swseri = SoftwareSerial(CONFIG_GSM_RXPIN, CONFIG_GSM_TXPIN);
 Adafruit_FONA fona = Adafruit_FONA(10);// OBJETO ADAFRUIT_FONA USADO PARA COMUNICARSE CON EL SIM800L
-static char texto= "pruebaaa";
 uint8_t readline(char *buff, uint8_t maxbuff, uint16_t timeout = 0);
 
 
@@ -144,6 +143,7 @@ void loop()
      bG_PrimeraEntrada = false;
     }
 
+//Serial.println(F("EST AQUI"));
  
        if (Estado_Equipo >= 1) // ESTADO DEL EQUIPO CADA 1 SEGUNDOS CAMBIA ESTADO DE LED
          {
@@ -232,22 +232,22 @@ void loop()
  
   if (Recibir == "OUT1A/VALOR")
   {
-      char callerIDbuffer[20];
+      //char callerIDbuffer[15];
       int valor=analogRead(A1);
-      char cstr[16];
+      char cstr[16];//ERA 16
       itoa(valor, cstr, 10);
         if (!fona.sendSMS(callerIDbuffer,cstr)) 
-//       {
-//        Serial.println(F("Confirmacion Enviada"));
-//        } else {
-//        Serial.println(F("No se envio confirmacion"));
-//        }  
-    Recibir ="SALIR";    
+       {
+        Serial.println(F("Confirmacion Enviada"));
+        } else {
+        Serial.println(F("No se envio confirmacion"));
+        }  
+    Recibir ="SA";    
   }
 
     if (Recibir == "OUT2A/VALOR")
   {
-      char callerIDbuffer[20];
+      //char callerIDbuffer[15];
       int valor=analogRead(A0);
       char cstr[16];
       itoa(valor, cstr, 10);
@@ -257,56 +257,54 @@ void loop()
         } else {
         Serial.println(F("No se envio confirmacion"));
         }  
-    Recibir ="SALIR";    
+    Recibir ="SA";    
   }
-  if (Recibir == "OUT3A/VALOR")
-  {
-      char callerIDbuffer[20];
-      int valor=analogRead(A7);
-      char cstr[16];
-      itoa(valor, cstr, 10);
-        if (!fona.sendSMS(callerIDbuffer,cstr)) 
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-        }  
-    Recibir ="SALIR";    
-  }
-
-    if (Recibir == "OUT4A/VALOR")
-  {
-      char callerIDbuffer[20];
-      int valor=analogRead(A6);
-      char cstr[16];
-      itoa(valor, cstr, 10);
-        if (!fona.sendSMS(callerIDbuffer,cstr)) 
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-        }  
-    Recibir ="SALIR";    
-  }
+//  if (Recibir == "OUT3A/VALOR")
+//  {
+//      char callerIDbuffer[15];
+//      int valor=analogRead(A7);
+//      char cstr[16];
+//      itoa(valor, cstr, 10);
+//        if (!fona.sendSMS(callerIDbuffer,cstr)) 
+//       {
+//        Serial.println(F("Confirmacion Enviada"));
+//        } else {
+//        Serial.println(F("No se envio confirmacion"));
+//        }  
+//    Recibir ="SA";    
+//  }
+//
+//    if (Recibir == "OUT4A/VALOR")
+//  {
+//      char callerIDbuffer[15];
+//      int valor=analogRead(A6);
+//      char cstr[16];
+//      itoa(valor, cstr, 10);
+//        if (!fona.sendSMS(callerIDbuffer,cstr)) 
+//       {
+//        Serial.println(F("Confirmacion Enviada"));
+//        } else {
+//        Serial.println(F("No se envio confirmacion"));
+//        }  
+//    Recibir ="SA";    
+//  }
   else if (Recibir == "CONECTAR")
   {
-   PROGRAMACION=true;
-   //Serial.println(Recibir);  
-   char callerIDbuffer[20];   
+   PROGRAMACION=true; 
+   //char callerIDbuffer[15];   
    if (!fona.sendSMS(callerIDbuffer, "CONECTADO OK")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
     } else {
     Serial.println(F("No se envio confirmacion"));
     }  
-  // Enviar_Respuesta ("CONEXION OK");
+    Recibir ="SALIR"; 
   }
   else if (Recibir == "OUT1/ON" )
    {
-   digitalWrite(RELE_1, HIGH);
-  // Serial.println(Recibir);
-   TEMPORIZADOR_OUT1=0;
-   char callerIDbuffer[15];   
+     digitalWrite(RELE_1, HIGH);
+     TEMPORIZADOR_OUT1=0;
+     //char callerIDbuffer[15];   
    if (!fona.sendSMS(callerIDbuffer, "SALIDA1 ON")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -321,7 +319,7 @@ void loop()
   {
    digitalWrite(RELE_1, LOW);
    //Serial.println(Recibir);
-      char callerIDbuffer[15];   
+    //char callerIDbuffer[15];   
    if (!fona.sendSMS(callerIDbuffer, "SALIDA1 OFF")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -334,7 +332,7 @@ void loop()
   {
    digitalWrite(RELE_2, HIGH);
    Serial.println(Recibir);
-   char callerIDbuffer[15];
+   //char callerIDbuffer[15];
     if (!fona.sendSMS(callerIDbuffer, "SALIDA2 ON")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -349,7 +347,7 @@ void loop()
   {
    digitalWrite(RELE_2, LOW);
    Serial.println(Recibir);
-   char callerIDbuffer[15];
+   //char callerIDbuffer[15];
      if (!fona.sendSMS(callerIDbuffer, "SALIDA2 OFF")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -364,7 +362,7 @@ void loop()
    digitalWrite(RELE_3, HIGH);
    Serial.println(Recibir);
    TEMPORIZADOR_OUT3=0;
-    char callerIDbuffer[15];
+   //char callerIDbuffer[15];
      if (!fona.sendSMS(callerIDbuffer, "SALIDA3 ON")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -378,7 +376,7 @@ void loop()
   {
    digitalWrite(RELE_3, LOW);
    Serial.println(Recibir);
-     char callerIDbuffer[15];
+   //char callerIDbuffer[15];
      if (!fona.sendSMS(callerIDbuffer, "SALIDA3 OFF")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -393,7 +391,7 @@ void loop()
    digitalWrite(RELE_4, HIGH);
    Serial.println(Recibir);
    TEMPORIZADOR_OUT4=0;
-     char callerIDbuffer[15];
+   //char callerIDbuffer[15];
      if (!fona.sendSMS(callerIDbuffer, "SALIDA4 ON")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -406,7 +404,7 @@ void loop()
   {
    digitalWrite(RELE_4, LOW);
    Serial.println(Recibir);
-     char callerIDbuffer[15];
+   //char callerIDbuffer[15];
      if (!fona.sendSMS(callerIDbuffer, "SALIDA4 OFF")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -425,7 +423,7 @@ void loop()
    TEMPORIZADOR_OUT2=0;
    TEMPORIZADOR_OUT3=0;
    TEMPORIZADOR_OUT4=0;
-    char callerIDbuffer[15];
+   //char callerIDbuffer[15];
      if (!fona.sendSMS(callerIDbuffer, "SALIDAS ON")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -437,11 +435,11 @@ void loop()
   }
    else  if (Recibir == "OUTS/OFF" )
   {
-   digitalWrite(RELE_1, LOW);
-   digitalWrite(RELE_2, LOW);
-   digitalWrite(RELE_3, LOW);
-   digitalWrite(RELE_4, LOW);
-      char callerIDbuffer[15];
+       digitalWrite(RELE_1, LOW);
+       digitalWrite(RELE_2, LOW);
+       digitalWrite(RELE_3, LOW);
+       digitalWrite(RELE_4, LOW);
+       //char callerIDbuffer[15];
      if (!fona.sendSMS(callerIDbuffer, "SALIDAS OFF")) // Enviar una respuesta automática
    {
     Serial.println(F("Confirmacion Enviada"));
@@ -478,13 +476,58 @@ void loop()
    TEMPORIZADOR_OUT4=0;
    Recibir ="SALIR"; 
    }
+char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
+  
+  if (fona.available())      //¿Algún dato disponible del FONA?
+  {
+    byte slot = 0;            //este será el número de ranura del SMS
+    int charCount = 0;
+   // Leer la notificación en fonaInBuffer
+    do  {
+      *bufPtr = fona.read();
+      Serial.write(*bufPtr);
+      delay(1);
+    } while ((*bufPtr++ != '\n') && (fona.available()) && (++charCount < (sizeof(fonaNotificationBuffer)-1)));
+    
+    // Agrega un terminal NULL a la cadena de notificación
+    *bufPtr = 0;
 
+    // Escanea la cadena de notificación en busca de una notificación recibida por SMS.
+    // Si es un mensaje SMS, obtendremos el número de ranura en 'ranura'
+    
+    if (1 == sscanf(fonaNotificationBuffer, "+CMTI: " FONA_PREF_SMS_STORAGE ",%d", &slot)) 
+    {
+      Serial.print("slot: "); Serial.println(slot);
+      
+      //char callerIDbuffer[20];  // almacenaremos el número del remitente del SMS aquí
+ 
+      if (! fona.getSMSSender(slot, callerIDbuffer, 20)) // Recuperar la dirección / número de teléfono del remitente de SMS.
+      {
+        Serial.println(F("Didn't find SMS message in slot!"));
+      }
+         Serial.print(F("FROM: ")); Serial.println(callerIDbuffer); // F Siginfica guardar cadena en memoria flash
+     
+          uint16_t smslen; // Recuperar valor de SMS.
+         if (fona.readSMS(slot, smsBuffer, 20, &smslen)) // ¡pasa el búfer y el máximo len!
+         { 
+          Serial.println(smsBuffer);
+          Recibir = smsBuffer;              
+         }
+       
+        if (fona.deleteSMS(slot)) //eliminar el mensaje original después de que se procese
+      {
+        delay(100);
+        Serial.println(F("MENSAJE ELIMINADO"));
+      } else {
+        unsigned char i;
+        for (i =0; i < 2; i++) fona.deleteSMS(slot);
+        Serial.print(F("NO SE PUDO ELIMINAR EL MENSAJE")); Serial.println(slot);
+        fona.print(F("AT+CMGD=?\r\n"));
+      }
+     
 
-
-RX();
-
-
-
+    }
+  }
 
 }
 
@@ -559,7 +602,7 @@ TIEMPO_OUT4 = ObtenerValor(SUMA_OUT4_TIEMPO, 0);
 //Serial.println(OUT3_TEMPORIZADA,DEC);
 //Serial.println(OUT4_TEMPORIZADA,DEC);
 //
-unsigned a,b,c,d,e,f,g,h,i;
+unsigned char a,b,c,d,e,f,g,h,i;
 //
 //Serial.print(F("Destinatario 1:"));
 //for (a=0;a<15;a++)
@@ -653,7 +696,7 @@ char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
         delay(100);
         Serial.println(F("MENSAJE ELIMINADO"));
       } else {
-        int i;
+        unsigned char i;
         for (i =0; i < 2; i++) fona.deleteSMS(slot);
         Serial.print(F("NO SE PUDO ELIMINAR EL MENSAJE")); Serial.println(slot);
         fona.print(F("AT+CMGD=?\r\n"));
@@ -663,6 +706,13 @@ char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
     }
   }
   
+//              if (!fona.sendSMS(callerIDbuffer, "COMANDO RECIBIDO")) // Enviar una respuesta automática
+//                 {
+//                  Serial.println(F("Confirmacion Enviada"));
+//                  } else {
+//                  Serial.println(F("No se envio confirmacion"));
+//                  }
+
 
           if (Recibir.startsWith("U", 0)) // registrar cantidad de destinatarios
             {
@@ -793,28 +843,34 @@ char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
             else if (Recibir == "OUT1/TEMP/ON")
               {
               EEPROM.write(EE_OUT1_TEMPORIZADA, 1); 
-              if (!fona.sendSMS(callerIDbuffer, "OUT1 TEMPORIZADA")) // Enviar una respuesta automática
-                 {
-                  Serial.println(F("Confirmacion Enviada"));
-                  } else {
-                  Serial.println(F("No se envio confirmacion"));
-                  } 
+//              if (!fona.sendSMS(callerIDbuffer, "OUT1 TEMPORIZADA")) // Enviar una respuesta automática
+//                 {
+//                  Serial.println(F("Confirmacion Enviada"));
+//                  } else {
+//                  Serial.println(F("No se envio confirmacion"));
+//                  } 
               Recibir = "SALIR";               
               }
              else if (Recibir == "OUT1/TEMP/OFF")
               {
               EEPROM.write(EE_OUT1_TEMPORIZADA, 0);
+//              if (!fona.sendSMS(callerIDbuffer, "OUT1 TEMP OFF")) // Enviar una respuesta automática
+//                 {
+//                  Serial.println(F("Confirmacion Enviada"));
+//                  } else {
+//                  Serial.println(F("No se envio confirmacion"));
+//                  } 
               Recibir = "SALIR"; 
               }
             else if (Recibir == "OUT2/TEMP/ON")
               {
               EEPROM.write(EE_OUT2_TEMPORIZADA, 1);
-              if (!fona.sendSMS(callerIDbuffer, "OUT2 TEMPORIZADA")) // Enviar una respuesta automática
-                 {
-                  Serial.println(F("Confirmacion Enviada"));
-                  } else {
-                  Serial.println(F("No se envio confirmacion"));
-                  } 
+//              if (!fona.sendSMS(callerIDbuffer, "OUT2 TEMPORIZADA")) // Enviar una respuesta automática
+//                 {
+//                  Serial.println(F("Confirmacion Enviada"));
+//                  } else {
+//                  Serial.println(F("No se envio confirmacion"));
+//                  } 
               Recibir = "SALIR"; 
               }
              else if (Recibir == "OUT2/TEMP/OFF")
@@ -825,12 +881,12 @@ char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
               if (Recibir == "OUT3/TEMP/ON")
               {
               EEPROM.write(EE_OUT3_TEMPORIZADA, 1);
-              if (!fona.sendSMS(callerIDbuffer, "OUT3 TEMPORIZADA")) // Enviar una respuesta automática
-                 {
-                  Serial.println(F("Confirmacion Enviada"));
-                  } else {
-                  Serial.println(F("No se envio confirmacion"));
-                  } 
+//              if (!fona.sendSMS(callerIDbuffer, "OUT3 TEMPORIZADA")) // Enviar una respuesta automática
+//                 {
+//                  Serial.println(F("Confirmacion Enviada"));
+//                  } else {
+//                  Serial.println(F("No se envio confirmacion"));
+//                  } 
               Recibir = "SALIR"; 
               }
            else  if (Recibir == "OUT3/TEMP/OFF")
@@ -841,12 +897,12 @@ char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
            else if (Recibir == "OUT4/TEMP/ON")
               {
               EEPROM.write(EE_OUT4_TEMPORIZADA, 1);
-              if (!fona.sendSMS(callerIDbuffer, "OUT4 TEMPORIZADA")) // Enviar una respuesta automática
-                 {
-                  Serial.println(F("Confirmacion Enviada"));
-                  } else {
-                  Serial.println(F("No se envio confirmacion"));
-                  } 
+//              if (!fona.sendSMS(callerIDbuffer, "OUT4 TEMPORIZADA")) // Enviar una respuesta automática
+//                 {
+//                  Serial.println(F("Confirmacion Enviada"));
+//                  } else {
+//                  Serial.println(F("No se envio confirmacion"));
+//                  } 
               Recibir = "SALIR"; 
               }
            else if (Recibir == "OUT4/TEMP/OFF")
@@ -971,62 +1027,6 @@ unsigned int ObtenerValor(byte paquete [], byte i)
 void RX (void)
 {
 
- char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
-  
-  if (fona.available())      //¿Algún dato disponible del FONA?
-  {
-    byte slot = 0;            //este será el número de ranura del SMS
-    int charCount = 0;
-   // Leer la notificación en fonaInBuffer
-    do  {
-      *bufPtr = fona.read();
-      Serial.write(*bufPtr);
-      delay(1);
-    } while ((*bufPtr++ != '\n') && (fona.available()) && (++charCount < (sizeof(fonaNotificationBuffer)-1)));
-    
-    // Agrega un terminal NULL a la cadena de notificación
-    *bufPtr = 0;
-
-    // Escanea la cadena de notificación en busca de una notificación recibida por SMS.
-    // Si es un mensaje SMS, obtendremos el número de ranura en 'ranura'
-    
-    if (1 == sscanf(fonaNotificationBuffer, "+CMTI: " FONA_PREF_SMS_STORAGE ",%d", &slot)) 
-    {
-      Serial.print("slot: "); Serial.println(slot);
-      
-      char callerIDbuffer[15];  // almacenaremos el número del remitente del SMS aquí
-
-
- 
-      if (! fona.getSMSSender(slot, callerIDbuffer, 15)) // Recuperar la dirección / número de teléfono del remitente de SMS.
-      {
-        Serial.println(F("Didn't find SMS message in slot!"));
-      }
-         Serial.print(F("FROM: ")); Serial.println(callerIDbuffer); // F Siginfica guardar cadena en memoria flash
-
-
-     
-          uint16_t smslen; // Recuperar valor de SMS.
-         if (fona.readSMS(slot, smsBuffer, 20, &smslen)) // ¡pasa el búfer y el máximo len!
-         { 
-          Serial.println(smsBuffer);
-          Recibir = smsBuffer;              
-         }
-       
-        if (fona.deleteSMS(slot)) //eliminar el mensaje original después de que se procese
-      {
-        delay(100);
-        Serial.println(F("MENSAJE ELIMINADO"));
-      } else {
-        int i;
-        for (i =0; i < 2; i++) fona.deleteSMS(slot);
-        Serial.print(F("NO SE PUDO ELIMINAR EL MENSAJE")); Serial.println(slot);
-        fona.print(F("AT+CMGD=?\r\n"));
-      }
-     
-
-    }
-  }
   
 
 }
