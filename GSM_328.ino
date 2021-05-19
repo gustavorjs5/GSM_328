@@ -43,7 +43,10 @@
 #define EE_OUT3_TEMPORIZADA 152
 #define EE_OUT4_TEMPORIZADA 153
 #define EE_CLAVE            154
+#define EE_TEXTO_IN1        158
+#define EE_TEXTO_IN2        200
 
+unsigned int Longitud_Cadena;
 unsigned char Estado_Equipo;
 unsigned int TEMPORIZADOR_OUT1;
 unsigned int TEMPORIZADOR_OUT2;
@@ -69,7 +72,9 @@ unsigned char DESTINATARIO_8[15];
 unsigned char DESTINATARIO_9[15];  
 unsigned char DESTINATARIO_10[15];
 unsigned char CLAVE[5];
+unsigned char IN1_TXT[40];
 String CLAVE_STRING;
+String IN1_TXT_STRING;
 char DESTINOS[10][15]; // 10 destinatarios con un maximo de 14 caracteres
 char replybuffer[20];                    //este es un gran búfer para las respuestas
 char fonaNotificationBuffer[30];          // 64 para notificaciones del FONA
@@ -246,7 +251,7 @@ void loop()
                for (i=0;i<CANTIDAD_DESTINOS;i++)
               {
                    
-                  if (!fona.sendSMS(DESTINOS[i], "ENTRADA 2 ACTIVA")) 
+                  if (!fona.sendSMS(DESTINOS[i], IN1_TXT)) 
                   {
                   Serial.println(F("ENVIADO"));
                   } else {
@@ -265,7 +270,7 @@ void loop()
                bitWrite(ESTADO_ENTRADAS, 1, 0);
               for (i=0;i<CANTIDAD_DESTINOS;i++)
               {  
-                if (!fona.sendSMS(DESTINOS[i], "ENTRADA 2 DESACTIVADA")) 
+                if (!fona.sendSMS(DESTINOS[i], IN1_TXT)) 
                 {
                 Serial.println(F("ENVIADO"));
                 } else {
@@ -548,15 +553,12 @@ void loop()
 
 }
 
- else
-  {
-    Serial.println("Modo Programacion");   
-    Programacion(); //llama a la funcion programacion y se queda ahi esta que cambia PROGRAMACION = 0;
-    bG_PrimeraEntrada = true; // primera entrada true para que vuelva a configurar las variables leidas de eeprom
-    //wdt_enable(WDTO_15MS);
-    delay(100);//activar DTW
-   
-  } 
+   else
+    {
+      Serial.println("Modo Programacion");   
+      Programacion(); //llama a la funcion programacion y se queda ahi esta que cambia PROGRAMACION = 0;
+      bG_PrimeraEntrada = true; // primera entrada true para que vuelva a configurar las variables leidas de eeprom 
+    } 
  }
 
 
@@ -591,6 +593,12 @@ r_eeprom(CLAVE, EE_CLAVE,4);
 CLAVE[4]=0;//le agrego un NULL para convertirlo en string
 CLAVE_STRING = CLAVE;
 Serial.println(CLAVE_STRING);
+
+
+r_eeprom(IN1_TXT, 158,Longitud_Cadena);
+IN1_TXT [Longitud_Cadena + 1]=0;
+IN1_TXT_STRING = IN1_TXT;
+Serial.println(IN1_TXT_STRING);
 OUT1_TEMPORIZADA = EEPROM.read(EE_OUT1_TEMPORIZADA);
 OUT2_TEMPORIZADA = EEPROM.read(EE_OUT2_TEMPORIZADA);
 OUT3_TEMPORIZADA = EEPROM.read(EE_OUT3_TEMPORIZADA);
@@ -599,24 +607,20 @@ OUT4_TEMPORIZADA = EEPROM.read(EE_OUT4_TEMPORIZADA);
 byte OUT1_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT1_1);
 byte OUT1_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT1_2);
 byte SUMA_OUT1_TIEMPO [2] = {OUT1_TIEMPO_2, OUT1_TIEMPO_1};
-Serial.println(OUT1_TIEMPO_1,DEC);
-Serial.println(OUT1_TIEMPO_2,DEC);
+
 TIEMPO_OUT1 = ObtenerValor(SUMA_OUT1_TIEMPO, 0);
 
 byte OUT2_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT2_1);
 byte OUT2_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT2_2);
 byte SUMA_OUT2_TIEMPO [2] = {OUT2_TIEMPO_2, OUT2_TIEMPO_1};
+
 TIEMPO_OUT2 = ObtenerValor(SUMA_OUT2_TIEMPO, 0);
 
 byte OUT3_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT3_1);
 byte OUT3_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT3_2);
 byte SUMA_OUT3_TIEMPO [2] = {OUT3_TIEMPO_2, OUT3_TIEMPO_1};
-TIEMPO_OUT3 = ObtenerValor(SUMA_OUT3_TIEMPO, 0);
 
-byte OUT4_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT4_1);
-byte OUT4_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT4_2);
-byte SUMA_OUT4_TIEMPO [2] = {OUT4_TIEMPO_2, OUT4_TIEMPO_1};
-TIEMPO_OUT4 = ObtenerValor(SUMA_OUT4_TIEMPO, 0);
+TIEMPO_OUT3 = ObtenerValor(SUMA_OUT3_TIEMPO, 0);
 
 unsigned char a,d;
 //
@@ -626,9 +630,7 @@ unsigned char a,d;
 // Serial.print(char(DESTINATARIO_1[a]));
 //}
 
-VALOR=EEPROM.read(EE_CANTIDAD_DESTINOS);
-Serial.println();
-Serial.println(VALOR,DEC);
+VALOR = EEPROM.read(EE_CANTIDAD_DESTINOS);
 
 CANTIDAD_DESTINOS = VALOR-48;
 
@@ -767,6 +769,19 @@ void Programacion(void)
                   }
                   fona.sendSMS(callerIDbuffer,"D10OK");
               }
+
+         else  if (Recibir.startsWith("TXT1", 0)) // TEXTO ENTRADA 1 ACTIVA
+             {
+                Recibir.remove(0, 4); 
+                Serial.println(Recibir);
+                Longitud_Cadena = Recibir.length(); 
+                 Serial.println(Longitud_Cadena);
+                  for(i=158;i< (158+Longitud_Cadena);i++)
+                  {             
+                  EEPROM.write(i,Recibir[i-158]);            
+                  }
+                  fona.sendSMS(callerIDbuffer,"TXT1OK");
+             }
 
            else if (Recibir.startsWith("C", 0)) // registra clave
               {
