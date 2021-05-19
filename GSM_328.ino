@@ -56,6 +56,8 @@ unsigned int TIEMPO_OUT4;
 unsigned char i;
 unsigned char CANTIDAD_DESTINOS; 
 unsigned char VALOR;  
+unsigned char ESTADO_SALIDAS;
+unsigned char ESTADO_ENTRADAS;
 unsigned char DESTINATARIO_1[15];  
 unsigned char DESTINATARIO_2[15];  
 unsigned char DESTINATARIO_3[15];  
@@ -89,8 +91,8 @@ const  char OUT2ON                     [] PROGMEM = "OUT2/ON";
 const  char OUT2OFF                    [] PROGMEM = "OUT2/OFF";
 const  char OUT3ON                     [] PROGMEM = "OUT3/ON";
 const  char OUT3OFF                    [] PROGMEM = "OUT3/OFF";
-const unsigned char RESP_CONEXION      [] PROGMEM = "CONECTADO OK";
-const unsigned char RESP_DESCONEXION   [] PROGMEM = "DESCONECTADO OK";
+const unsigned char RESP_CONEXION      [] PROGMEM = "CNTOK";
+const unsigned char RESP_DESCONEXION   [] PROGMEM = "DCNTOK";
 const unsigned char CONECTAR           [] PROGMEM = "CONECTAR";
 const unsigned char DESCONECTAR        [] PROGMEM = "DESCONECTAR";
 const unsigned char CONSULTA_INA1      [] PROGMEM = "INA1/VALOR";
@@ -101,27 +103,27 @@ const unsigned char OUT3_TEMP_ON       [] PROGMEM = "OUT3/TEMP/ON";
 const unsigned char OUT1_TEMP_OFF      [] PROGMEM = "OUT1/TEMP/OFF";
 const unsigned char OUT2_TEMP_OFF      [] PROGMEM = "OUT2/TEMP/OFF";
 const unsigned char OUT3_TEMP_OFF      [] PROGMEM = "OUT3/TEMP/OFF";
-const unsigned char RESP_OUT1_TEMP_ON  [] PROGMEM = "OUT1 TEMP ON OK";
-const unsigned char RESP_OUT2_TEMP_ON  [] PROGMEM = "OUT2 TEMP ON OK";
-const unsigned char RESP_OUT3_TEMP_ON  [] PROGMEM = "OUT3 TEMP ON OK";
-const unsigned char RESP_OUT1_TEMP_OFF [] PROGMEM = "OUT1 TEMP OFF OK";
-const unsigned char RESP_OUT2_TEMP_OFF [] PROGMEM = "OUT2 TEMP OFF OK";
-const unsigned char RESP_OUT3_TEMP_OFF [] PROGMEM = "OUT3 TEMP OFF OK";
-const unsigned char RESP_OUT1_ON       [] PROGMEM = "OUT1 ON OK";
-const unsigned char RESP_OUT2_ON       [] PROGMEM = "OUT2 ON OK";
-const unsigned char RESP_OUT3_ON       [] PROGMEM = "OUT3 ON OK";
-const unsigned char RESP_OUT1_OFF      [] PROGMEM = "OUT1 OFF OK";
-const unsigned char RESP_OUT2_OFF      [] PROGMEM = "OUT2 OFF OK";
-const unsigned char RESP_OUT3_OFF      [] PROGMEM = "OUT3 OFF OK";
-const unsigned char RESP_OUTS_ON       [] PROGMEM = "SALIDAS ON OK";
-const unsigned char RESP_OUTS_OFF      [] PROGMEM = "SALIDAS OFF OK";
+const unsigned char RESP_OUT1_TEMP_ON  [] PROGMEM = "S1TONOK";
+const unsigned char RESP_OUT2_TEMP_ON  [] PROGMEM = "S2TONOK";
+const unsigned char RESP_OUT3_TEMP_ON  [] PROGMEM = "S3TONOK";
+const unsigned char RESP_OUT1_TEMP_OFF [] PROGMEM = "S1TOFFOK";
+const unsigned char RESP_OUT2_TEMP_OFF [] PROGMEM = "S2TOFFOK";
+const unsigned char RESP_OUT3_TEMP_OFF [] PROGMEM = "S3TOFFOK";
+const unsigned char RESP_OUT1_ON       [] PROGMEM = "S1ONOK";
+const unsigned char RESP_OUT2_ON       [] PROGMEM = "S2ONOK";
+const unsigned char RESP_OUT3_ON       [] PROGMEM = "S3ONOK";
+const unsigned char RESP_OUT1_OFF      [] PROGMEM = "S1OFFOK";
+const unsigned char RESP_OUT2_OFF      [] PROGMEM = "S2OFOK";
+const unsigned char RESP_OUT3_OFF      [] PROGMEM = "S3OFFOK";
+const unsigned char RESP_OUTS_ON       [] PROGMEM = "SONOK";
+const unsigned char RESP_OUTS_OFF      [] PROGMEM = "SOFFOK";
 const unsigned char OUTS_ON            [] PROGMEM = "OUTS/ON";
 const unsigned char OUTS_OFF           [] PROGMEM = "OUTS/OFF";
-const unsigned char OUT1_TIEMPO        [] PROGMEM = "OUT1 TIEMPO OK";
-const unsigned char OUT2_TIEMPO        [] PROGMEM = "OUT2 TIEMPO OK";
-const unsigned char OUT3_TIEMPO        [] PROGMEM = "OUT3 TIEMPO OK";
-const unsigned char CLAVE_CONFIG       [] PROGMEM = "CLAVE OK";
-const unsigned char CANTIDAD_USUARIOS  [] PROGMEM = "DESTINOS OK";
+const unsigned char OUT1_TIEMPO        [] PROGMEM = "S1TOK";
+const unsigned char OUT2_TIEMPO        [] PROGMEM = "S2TOK";
+const unsigned char OUT3_TIEMPO        [] PROGMEM = "S3TOK";
+const unsigned char CLAVE_CONFIG       [] PROGMEM = "CLAVEOK";
+const unsigned char CANTIDAD_USUARIOS  [] PROGMEM = "DESTINOSOK";
 
 SoftwareSerial swseri = SoftwareSerial(CONFIG_GSM_RXPIN, CONFIG_GSM_TXPIN);
 Adafruit_FONA fona = Adafruit_FONA(10);// OBJETO ADAFRUIT_FONA USADO PARA COMUNICARSE CON EL SIM800L
@@ -165,12 +167,6 @@ void setup()
       //while (1);
     }
 
-//  if (!fona.sendSMS(DESTINATARIO_1, "SISTEMA ENCENDIDO")) // AQUI SE REALIZA EL ENVIO DEL MENSAJE SMS
-//  {
-//    Serial.println(F("ENVIADO"));
-//  } else {
-//    Serial.println(F("ERROR"));
-//  }
 int j;
 for (j=0;j<21;j++)
 {
@@ -189,7 +185,6 @@ void loop()
   {
    if(bG_PrimeraEntrada == true)  // PRIMERA ENTRADA PARA INICIALIZAR VARIABLES 
     { 
-     //wdt_disable();//DESACTIVO PERRO GUARDION
      InicializarVariables();
      bG_PrimeraEntrada = false;
     }
@@ -201,13 +196,13 @@ void loop()
           digitalWrite( LED_AUX,ESTADO_LED);
          }
 
-
  if (digitalRead(IN1)==LOW && (ESTADO_ANTERIOR_IN1)== HIGH)
     {
         delay(10);
         
        if (digitalRead(IN1)==LOW && (ESTADO_ANTERIOR_IN1)== HIGH)
         {   
+           bitWrite(ESTADO_ENTRADAS, 0, 1);
 
             for (i=0;i<CANTIDAD_DESTINOS;i++)
               {
@@ -228,14 +223,18 @@ void loop()
         {    
           delay(10);
         if (digitalRead(IN1)==HIGH && (ESTADO_ANTERIOR_IN1)==LOW) 
-           {     
-          if (!fona.sendSMS(DESTINOS[i], "ENTRADA 1 DESACTIVA")) 
-            {
-            Serial.println(F("ENVIADO"));
-            } else {
-             Serial.println(F("ERROR"));
-            }
-            
+           {   
+             bitWrite(ESTADO_ENTRADAS, 0, 1);
+
+               for (i=0;i<CANTIDAD_DESTINOS;i++)
+              {
+                if (!fona.sendSMS(DESTINOS[i], "ENTRADA 1 DESACTIVADA")) 
+                  {
+                  Serial.println(F("ENVIADO"));
+                  } else {
+                   Serial.println(F("ERROR"));
+                  }
+             }
              ESTADO_ANTERIOR_IN1=HIGH;
            }
          }
@@ -245,6 +244,7 @@ void loop()
            delay(10);
          if (digitalRead(IN2)==LOW && (ESTADO_ANTERIOR_IN2)== HIGH)
                { 
+                 bitWrite(ESTADO_ENTRADAS, 1, 1);
                for (i=0;i<CANTIDAD_DESTINOS;i++)
               {
                    
@@ -264,9 +264,10 @@ void loop()
          delay(10);
         if (digitalRead(IN2)==HIGH && (ESTADO_ANTERIOR_IN2)==LOW) 
            {  
+               bitWrite(ESTADO_ENTRADAS, 1, 0);
               for (i=0;i<CANTIDAD_DESTINOS;i++)
               {  
-                if (!fona.sendSMS(DESTINOS[i], "ENTRADA 2 DESACTIVA")) 
+                if (!fona.sendSMS(DESTINOS[i], "ENTRADA 2 DESACTIVADA")) 
                 {
                 Serial.println(F("ENVIADO"));
                 } else {
@@ -281,10 +282,6 @@ void loop()
  
   if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[10]))))
   {
-
-//        int valor1 = analogRead(A1);
-//        char cstr[16];//ERA 16
-//        itoa(valor1, cstr, 10);
         char Concatenacion_1 [15];
         char Texto_1[]="INA1";
         int  Valor_1=analogRead(A1);
@@ -313,6 +310,34 @@ void loop()
         Recibir ="SALIR";    
   }
 
+   if (Recibir == "S/EST")
+    {
+        char Concatenacion_3 [15];
+        char Texto_3[]="SA";
+        sprintf(Concatenacion_3,"%s=%i",Texto_3,ESTADO_SALIDAS);
+        if (!fona.sendSMS(callerIDbuffer,Concatenacion_3)) 
+        {
+        Serial.println(F("Confirmacion Enviada"));
+        } else {
+        Serial.println(F("No se envio confirmacion"));
+        }  
+        Recibir ="SALIR";    
+  }
+
+     if (Recibir == "E/EST")
+    {
+        char Concatenacion_4 [15];
+        char Texto_4[]="EN";
+        sprintf(Concatenacion_4,"%s=%i",Texto_4,ESTADO_ENTRADAS);
+        if (!fona.sendSMS(callerIDbuffer,Concatenacion_4)) 
+        {
+        Serial.println(F("Confirmacion Enviada"));
+        } else {
+        Serial.println(F("No se envio confirmacion"));
+        }  
+        Recibir ="SALIR";    
+  }
+
   else if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[8]))))
   {
    PROGRAMACION=true;   
@@ -327,6 +352,7 @@ void loop()
   else if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[0])))+CLAVE_STRING)
    {
      digitalWrite(RELE_1, HIGH);
+      bitWrite(ESTADO_SALIDAS, 0, 1);
      TEMPORIZADOR_OUT1=0;
      if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[24])))))
        {
@@ -340,6 +366,7 @@ void loop()
    else if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[1])))+CLAVE_STRING)
   {
    digitalWrite(RELE_1, LOW);
+   bitWrite(ESTADO_SALIDAS, 0, 0);
      if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[27])))))
        {
         Serial.println(F("Confirmacion Enviada"));
@@ -351,6 +378,7 @@ void loop()
    else if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[2])))+CLAVE_STRING)
   {
    digitalWrite(RELE_2, HIGH);
+    bitWrite(ESTADO_SALIDAS, 1, 1);
    Serial.println(Recibir);
      if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[25])))))
        {
@@ -365,6 +393,7 @@ void loop()
     else if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[3])))+CLAVE_STRING)
   {
    digitalWrite(RELE_2, LOW);
+   bitWrite(ESTADO_SALIDAS, 1, 0);
    Serial.println(Recibir);
      if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[28])))))
        {
@@ -378,6 +407,7 @@ void loop()
    else if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[4])))+CLAVE_STRING)
   {
    digitalWrite(RELE_3, HIGH);
+   bitWrite(ESTADO_SALIDAS, 2, 1);
    Serial.println(Recibir);
    TEMPORIZADOR_OUT3=0;
      if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[26])))))
@@ -392,6 +422,7 @@ void loop()
    else  if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[5])))+ CLAVE_STRING)
   {
    digitalWrite(RELE_3, LOW);
+    bitWrite(ESTADO_SALIDAS, 2, 0);
    Serial.println(Recibir);
      if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[29])))))
        {
@@ -408,6 +439,7 @@ void loop()
    digitalWrite(RELE_2, HIGH);
    digitalWrite(RELE_3, HIGH);
    digitalWrite(RELE_4, HIGH);
+   ESTADO_SALIDAS = 7;
    TEMPORIZADOR_OUT1=0;
    TEMPORIZADOR_OUT2=0;
    TEMPORIZADOR_OUT3=0;
@@ -427,6 +459,7 @@ void loop()
        digitalWrite(RELE_2, LOW);
        digitalWrite(RELE_3, LOW);
        digitalWrite(RELE_4, LOW);
+       ESTADO_SALIDAS = 0;
      if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[31])))))
        {
         Serial.println(F("Confirmacion Enviada"));
@@ -587,39 +620,20 @@ byte OUT4_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT4_2);
 byte SUMA_OUT4_TIEMPO [2] = {OUT4_TIEMPO_2, OUT4_TIEMPO_1};
 TIEMPO_OUT4 = ObtenerValor(SUMA_OUT4_TIEMPO, 0);
 
-//Serial.println(TIEMPO_OUT1,DEC);
-//Serial.println(OUT1_TEMPORIZADA,DEC);
-//Serial.println(OUT2_TEMPORIZADA,DEC);
-//Serial.println(OUT3_TEMPORIZADA,DEC);
-//Serial.println(OUT4_TEMPORIZADA,DEC);
-//
-unsigned char a,b,c,d,e,f,g,h,i;
+unsigned char a,d;
 //
 //Serial.print(F("Destinatario 1:"));
 //for (a=0;a<15;a++)
 //{
 // Serial.print(char(DESTINATARIO_1[a]));
 //}
-//Serial.println();
-//Serial.print(F("Destinatario 2:"));
-//for (b=0;b<15;b++)
-//{
-// Serial.print(char(DESTINATARIO_2[b]));
-//}
-//Serial.println();
-//Serial.print(F("Destinatario 3:"));
-//for (c=0;c<15;c++)
-//{
-// Serial.print(char(DESTINATARIO_3[c]));
-//}
+
 VALOR=EEPROM.read(EE_CANTIDAD_DESTINOS);
 Serial.println();
 Serial.println(VALOR,DEC);
 
 CANTIDAD_DESTINOS = VALOR-48;
 
-//Serial.println();
-//
     for (d=0;d<14;d++)
     {
      DESTINOS[0][d]=DESTINATARIO_1[d];
@@ -667,7 +681,7 @@ void Programacion(void)
                 {             
                   EEPROM.write(i,Recibir[i]);            
                 }
-                fona.sendSMS(callerIDbuffer,"D1 OK");
+                fona.sendSMS(callerIDbuffer,"D1OK");
               }
 
          else if (Recibir.startsWith("2", 0)) // registrar destino 2
@@ -677,7 +691,7 @@ void Programacion(void)
                 {             
                   EEPROM.write(i,Recibir[i-14]);            
                 }
-                fona.sendSMS(callerIDbuffer,"D2 OK");
+                fona.sendSMS(callerIDbuffer,"D2OK");
            }
          else  if (Recibir.startsWith("3", 0)) // registrar destino 3
           {
@@ -686,7 +700,7 @@ void Programacion(void)
                 {             
                   EEPROM.write(i,Recibir[i-28]);            
                 }
-                fona.sendSMS(callerIDbuffer,"D3 OK");
+                fona.sendSMS(callerIDbuffer,"D3OK");
            }
 
           else if (Recibir.startsWith("4", 0)) // registrar destino 4
@@ -696,7 +710,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-42]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D4 OK");
+                  fona.sendSMS(callerIDbuffer,"D4OK");
             }
          else if (Recibir.startsWith("5", 0)) // registrar destino 5
           {
@@ -705,7 +719,7 @@ void Programacion(void)
                   {             
                     EEPROM.write(i,Recibir[i-56]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D5 OK");
+                  fona.sendSMS(callerIDbuffer,"D5OK");
            }
 
           else if (Recibir.startsWith("6", 0)) // registrar destino 6
@@ -715,7 +729,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-70]);         
                   }
-                  fona.sendSMS(callerIDbuffer,"D6 OK");
+                  fona.sendSMS(callerIDbuffer,"D6OK");
               }
            else if (Recibir.startsWith("7", 0)) // registrar destino 7
              {
@@ -724,7 +738,7 @@ void Programacion(void)
                     {             
                     EEPROM.write(i,Recibir[i-84]);            
                     }
-                    fona.sendSMS(callerIDbuffer,"D7 OK");
+                    fona.sendSMS(callerIDbuffer,"D7OK");
               }
 
           else if (Recibir.startsWith("8", 0)) // registrar destino 8
@@ -734,7 +748,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-98]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D8 OK");
+                  fona.sendSMS(callerIDbuffer,"D8OK");
               }
           else  if (Recibir.startsWith("9", 0)) // registrar destino 9
              {
@@ -743,7 +757,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-112]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D9 OK");
+                  fona.sendSMS(callerIDbuffer,"D9OK");
              }
 
           else if (Recibir.startsWith("0", 0)) // registrar destino 10
@@ -753,7 +767,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-126]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D10 OK");
+                  fona.sendSMS(callerIDbuffer,"D10OK");
               }
 
            else if (Recibir.startsWith("C", 0)) // registra clave
@@ -831,7 +845,6 @@ void Programacion(void)
               Recibir.remove(0, 3);
               unsigned int OUT2_TIEMPO;
               OUT2_TIEMPO = Recibir.toInt();            
-              //Serial.println(OUT2_TIEMPO);
               byte OUT2_1;
               byte OUT2_2;
               OUT2_1 = OUT2_TIEMPO & 0XFF;
