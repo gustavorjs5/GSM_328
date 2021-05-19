@@ -139,8 +139,7 @@ char buffer[25];  // make sure this is large enough for the largest string it mu
 
 void setup() 
 {
-  // PREPARAR PINES IO
-  Serial.println(F("ARDUINO SE REINICIO"));
+
   pinMode(RELE_1, OUTPUT);  
   pinMode(RELE_2, OUTPUT);  
   pinMode(RELE_3, OUTPUT); 
@@ -156,9 +155,6 @@ void setup()
   Timer1.attachInterrupt(Timer100ms);           // Activa la interrupcion y la asocia a Timer100ms 
   ESTADO_ANTERIOR_IN1 = HIGH;
   ESTADO_ANTERIOR_IN2 = HIGH;
-
-  // INICIAR LA COMUNICACION CON EL MODULO GSM
-  // PASAMOS REFERENCIA AL PUERTO SERIE USADO PARA LA COMUNICACION CON EL MODEM
   if (fona.begin(swseri))
     Serial.println(F("MODULO GSM OK"));
     else
@@ -167,7 +163,7 @@ void setup()
       //while (1);
     }
 
-int j;
+unsigned char j;
 for (j=0;j<21;j++)
 {
 fona.deleteSMS(j);
@@ -212,6 +208,7 @@ void loop()
               } else {
                Serial.println(F("ERROR"));
               }
+              delay(2000);
               } 
              ESTADO_ANTERIOR_IN1=LOW;
              
@@ -234,6 +231,7 @@ void loop()
                   } else {
                    Serial.println(F("ERROR"));
                   }
+                  delay(2000);
              }
              ESTADO_ANTERIOR_IN1=HIGH;
            }
@@ -254,7 +252,7 @@ void loop()
                   } else {
                    Serial.println(F("ERROR"));
                   }
-                  delay(4000);
+                  delay(2000);
               }
              ESTADO_ANTERIOR_IN2=LOW;
             } 
@@ -273,7 +271,7 @@ void loop()
                 } else {
                  Serial.println(F("ERROR"));
                 }
-                 delay(4000);
+                 delay(2000);
             }
               ESTADO_ANTERIOR_IN2=HIGH;
            }
