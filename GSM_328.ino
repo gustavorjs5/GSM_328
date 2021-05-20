@@ -47,10 +47,10 @@
 #define EE_TEXTO_IN1_OFF        198
 #define EE_TEXTO_IN2_ON         238
 #define EE_TEXTO_IN2_OFF        278
-#define EE_LONGITUD_IN1_ON        279
-#define EE_LONGITUD_IN1_OFF       280
-#define EE_LONGITUD_IN2_ON        281
-#define EE_LONGITUD_IN2_OFF       283
+#define EE_LONGITUD_IN1_ON        318
+#define EE_LONGITUD_IN1_OFF       319
+#define EE_LONGITUD_IN2_ON        320
+#define EE_LONGITUD_IN2_OFF       321
 
 static unsigned char LONG_TXT_IN1_ON;
 static unsigned char LONG_TXT_IN1_OFF;
@@ -83,13 +83,13 @@ unsigned char DESTINATARIO_10[15];
 unsigned char CLAVE[5];
 unsigned char IN1_TXT_ON [40];
 unsigned char IN1_TXT_OFF[40];
-//unsigned char IN2_TXT_ON [40];
-//unsigned char IN2_TXT_OFF[40];
+unsigned char IN2_TXT_ON [40];
+unsigned char IN2_TXT_OFF[40];
 String CLAVE_STRING;
 String IN1_TXT_ON_STRING;
 String IN1_TXT_OFF_STRING;
-//String IN2_TXT_ON_STRING;
-//String IN2_TXT_OFF_STRING;
+String IN2_TXT_ON_STRING;
+String IN2_TXT_OFF_STRING;
 char DESTINOS[10][15]; // 10 destinatarios con un maximo de 14 caracteres
 char replybuffer[20];                    //este es un gran búfer para las respuestas
 char fonaNotificationBuffer[30];          // 64 para notificaciones del FONA
@@ -183,10 +183,10 @@ void setup()
       //while (1);
     }
 
-unsigned char j;
-for (j=0;j<21;j++)
+unsigned char b;
+for (b=0;b<21;b++)
 {
-fona.deleteSMS(j);
+fona.deleteSMS(b);
 }
   swseri.print("AT+CNMI=2,1\r\n");  //configurar el FONA para enviar una notificación + CMTI cuando se reciba un SMS
   bG_PrimeraEntrada=true;
@@ -266,12 +266,12 @@ void loop()
                for (i=0;i<CANTIDAD_DESTINOS;i++)
               {
                    
-//                  if (!fona.sendSMS(DESTINOS[i], IN2_TXT_ON)) 
-//                  {
-//                  Serial.println(F("ENVIADO"));
-//                  } else {
-//                   Serial.println(F("ERROR"));
-//                  }
+                  if (!fona.sendSMS(DESTINOS[i], IN2_TXT_ON)) 
+                  {
+                  Serial.println(F("ENVIADO"));
+                  } else {
+                   Serial.println(F("ERROR"));
+                  }
                   delay(2000);
               }
              ESTADO_ANTERIOR_IN2=LOW;
@@ -285,12 +285,12 @@ void loop()
                bitWrite(ESTADO_ENTRADAS, 1, 0);
               for (i=0;i<CANTIDAD_DESTINOS;i++)
               {  
-//                if (!fona.sendSMS(DESTINOS[i], IN2_TXT_OFF)) 
-//                {
-//                Serial.println(F("ENVIADO"));
-//                } else {
-//                 Serial.println(F("ERROR"));
-//                }
+                if (!fona.sendSMS(DESTINOS[i], IN2_TXT_OFF)) 
+                {
+                Serial.println(F("ENVIADO"));
+                } else {
+                 Serial.println(F("ERROR"));
+                }
                  delay(2000);
             }
               ESTADO_ANTERIOR_IN2=HIGH;
@@ -614,7 +614,7 @@ Longitud_IN1_ON = EEPROM.read(EE_LONGITUD_IN1_ON );
 r_eeprom(IN1_TXT_ON, EE_TEXTO_IN1_ON, Longitud_IN1_ON );
 IN1_TXT_ON [Longitud_IN1_ON + 1] = 0 ; //NULL
 IN1_TXT_ON_STRING = IN1_TXT_ON;
-Serial.println(Longitud_IN1_ON);
+//Serial.println(Longitud_IN1_ON);
 Serial.println(IN1_TXT_ON_STRING);
 
 Serial.println();
@@ -624,26 +624,28 @@ Longitud_IN1_OFF = EEPROM.read(EE_LONGITUD_IN1_OFF );
 r_eeprom(IN1_TXT_OFF,EE_TEXTO_IN1_OFF,Longitud_IN1_OFF);
 IN1_TXT_OFF [Longitud_IN1_OFF + 1]=0; //NULL
 IN1_TXT_OFF_STRING = IN1_TXT_OFF;
-Serial.println(Longitud_IN1_OFF);
+//Serial.println(Longitud_IN1_OFF);
 Serial.println(IN1_TXT_OFF_STRING);
 
 
-//unsigned char Longitud_IN2_ON;
-//Longitud_IN2_ON = EEPROM.read(EE_LONGITUD_IN2_ON );
-//r_eeprom(IN2_TXT_ON,EE_TEXTO_IN2_ON,Longitud_IN2_ON);
-//IN2_TXT_ON [LONG_TXT_IN2_ON + 1]=0; //NULL
-//IN2_TXT_ON_STRING = IN2_TXT_ON;
+unsigned char Longitud_IN2_ON;
+Longitud_IN2_ON = EEPROM.read(EE_LONGITUD_IN2_ON );
+r_eeprom(IN2_TXT_ON,EE_TEXTO_IN2_ON,Longitud_IN2_ON);
+IN2_TXT_ON [Longitud_IN2_ON + 1]=0; //NULL
+IN2_TXT_ON_STRING = IN2_TXT_ON;
 //Serial.println(Longitud_IN2_ON);
-//Serial.println(IN2_TXT_ON_STRING);
-//
-//Serial.println();
-//unsigned char Longitud_IN2_OFF;
-//Longitud_IN2_ON = EEPROM.read(EE_LONGITUD_IN2_OFF );
-//r_eeprom(IN2_TXT_OFF,EE_TEXTO_IN2_OFF,Longitud_IN2_OFF);
-//IN2_TXT_OFF [LONG_TXT_IN2_OFF + 1]=0; //NULL
-//IN2_TXT_OFF_STRING = IN2_TXT_OFF;
-//Serial.println(Longitud_IN2_OFF);
-//Serial.println(IN2_TXT_OFF_STRING);
+Serial.println(IN2_TXT_ON_STRING);
+
+Serial.println();
+unsigned char Longitud_IN2_OFF;
+Longitud_IN2_OFF = EEPROM.read(EE_LONGITUD_IN2_OFF );
+Serial.println(Longitud_IN2_OFF);
+r_eeprom(IN2_TXT_OFF,EE_TEXTO_IN2_OFF,19);
+IN2_TXT_OFF [Longitud_IN2_OFF + 1]=0; //NULL
+IN2_TXT_OFF_STRING = IN2_TXT_OFF;
+
+Serial.println(IN2_TXT_OFF_STRING);
+
 
 
 
@@ -705,7 +707,8 @@ void Programacion(void)
 {
   while(PROGRAMACION == true)
   {
-
+//
+//Serial.println("ESTOY AQUI");
 
 
          if (Recibir.startsWith("U", 0)) // registrar cantidad de destinatarios
@@ -729,7 +732,7 @@ void Programacion(void)
                 {             
                   EEPROM.write(i,Recibir[i]);            
                 }
-                fona.sendSMS(callerIDbuffer,"D1OK");
+//                fona.sendSMS(callerIDbuffer,"D1OK");
               }
 
          else if (Recibir.startsWith("2", 0)) // registrar destino 2
@@ -739,7 +742,7 @@ void Programacion(void)
                 {             
                   EEPROM.write(i,Recibir[i-14]);            
                 }
-                fona.sendSMS(callerIDbuffer,"D2OK");
+//                fona.sendSMS(callerIDbuffer,"D2OK");
            }
          else  if (Recibir.startsWith("3", 0)) // registrar destino 3
           {
@@ -748,7 +751,7 @@ void Programacion(void)
                 {             
                   EEPROM.write(i,Recibir[i-28]);            
                 }
-                fona.sendSMS(callerIDbuffer,"D3OK");
+//                fona.sendSMS(callerIDbuffer,"D3OK");
            }
 
           else if (Recibir.startsWith("4", 0)) // registrar destino 4
@@ -758,7 +761,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-42]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D4OK");
+//                  fona.sendSMS(callerIDbuffer,"D4OK");
             }
          else if (Recibir.startsWith("5", 0)) // registrar destino 5
           {
@@ -767,7 +770,7 @@ void Programacion(void)
                   {             
                     EEPROM.write(i,Recibir[i-56]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D5OK");
+//                  fona.sendSMS(callerIDbuffer,"D5OK");
            }
 
           else if (Recibir.startsWith("6", 0)) // registrar destino 6
@@ -777,7 +780,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-70]);         
                   }
-                  fona.sendSMS(callerIDbuffer,"D6OK");
+//                  fona.sendSMS(callerIDbuffer,"D6OK");
               }
            else if (Recibir.startsWith("7", 0)) // registrar destino 7
              {
@@ -786,7 +789,7 @@ void Programacion(void)
                     {             
                     EEPROM.write(i,Recibir[i-84]);            
                     }
-                    fona.sendSMS(callerIDbuffer,"D7OK");
+//                    fona.sendSMS(callerIDbuffer,"D7OK");
               }
 
           else if (Recibir.startsWith("8", 0)) // registrar destino 8
@@ -796,7 +799,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-98]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D8OK");
+//                  fona.sendSMS(callerIDbuffer,"D8OK");
               }
           else  if (Recibir.startsWith("9", 0)) // registrar destino 9
              {
@@ -805,7 +808,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-112]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D9OK");
+//                  fona.sendSMS(callerIDbuffer,"D9OK");
              }
 
           else if (Recibir.startsWith("0", 0)) // registrar destino 10
@@ -815,7 +818,7 @@ void Programacion(void)
                   {             
                   EEPROM.write(i,Recibir[i-126]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"D10OK");
+//                  fona.sendSMS(callerIDbuffer,"D10OK");
               }
 
          else  if (Recibir.startsWith("TX1ON", 0)) // TEXTO ENTRADA 1 ACTIVA
@@ -845,33 +848,38 @@ void Programacion(void)
                   fona.sendSMS(callerIDbuffer,"TX1OFFOK");
              }
 
-//         else  if (Recibir.startsWith("TX2ON", 0)) // TEXTO ENTRADA 1 ACTIVA
-//             {
-//                  Recibir.remove(0, 5); 
-//                  Serial.println(Recibir);
-//                  LONG_TXT_IN2_ON = Recibir.length(); 
-//                  EEPROM.write(EE_LONGITUD_IN2_ON ,LONG_TXT_IN2_ON); 
-//                  Serial.println(LONG_TXT_IN2_ON );
-//                  for(i=238;i< (238+LONG_TXT_IN2_ON );i++)
-//                  {             
-//                  EEPROM.write(i,Recibir[i-238]);            
-//                  }
-//                  fona.sendSMS(callerIDbuffer,"TX2ONOK");
-//             }
-//
-//          else  if (Recibir.startsWith("TX2OFF", 0)) // TEXTO ENTRADA 1 ACTIVA
-//             {
-//                  Recibir.remove(0, 6); 
-//                  Serial.println(Recibir);
-//                  LONG_TXT_IN2_OFF  = Recibir.length(); 
-//                  EEPROM.write(EE_LONGITUD_IN2_OFF ,LONG_TXT_IN2_OFF); 
-//                  Serial.println(LONG_TXT_IN2_OFF);
-//                  for(i=278;i< (278+LONG_TXT_IN2_OFF);i++)
-//                  {             
-//                  EEPROM.write(i,Recibir[i-278]);            
-//                  }
-//                  fona.sendSMS(callerIDbuffer,"TX2OFFOK");
-//             }
+         else  if (Recibir.startsWith("TX2ON", 0)) // TEXTO ENTRADA 1 ACTIVA
+             {
+                  Recibir.remove(0, 5); 
+                  Serial.println(Recibir);
+                  LONG_TXT_IN2_ON = Recibir.length(); 
+                  EEPROM.write(EE_LONGITUD_IN2_ON ,LONG_TXT_IN2_ON); 
+                  Serial.println(LONG_TXT_IN2_ON );
+                  for(i=238;i< (238+LONG_TXT_IN2_ON );i++)
+                  {             
+                  EEPROM.write(i,Recibir[i-238]);            
+                  }
+
+                  
+                  fona.sendSMS(callerIDbuffer,"TX2ONOK");
+                  Recibir = "SALIR";
+             }
+
+          else  if (Recibir.startsWith("TX2OFF", 0)) // TEXTO ENTRADA 1 ACTIVA
+             {
+                  Recibir.remove(0, 6); 
+                  Serial.println(Recibir);
+                  LONG_TXT_IN2_OFF  = Recibir.length(); 
+                  EEPROM.write(EE_LONGITUD_IN2_OFF ,LONG_TXT_IN2_OFF); 
+                  Serial.println(LONG_TXT_IN2_OFF);
+                  unsigned int j=0;
+                  for(j=278;j <(278+LONG_TXT_IN2_OFF);j++)
+                  {         
+                  EEPROM.write(j,Recibir[j-278]);            
+                  }
+                  fona.sendSMS(callerIDbuffer,"TX2OFFOK");
+                  Recibir = "SALIR";
+             }
 
            else if (Recibir.startsWith("C", 0)) // registra clave
               {
@@ -1050,7 +1058,7 @@ void w_eeprom(unsigned char DirEE, unsigned char *pDato, unsigned char cL_Cantid
   }
   return;
 }
-void r_eeprom(unsigned char *pDato, unsigned char DirEE, unsigned char cL_CantidadDeBytes)
+void r_eeprom(unsigned char *pDato, unsigned int DirEE, unsigned char cL_CantidadDeBytes)
 {
   static unsigned char i;
   for(i=0; i<cL_CantidadDeBytes;i++)
