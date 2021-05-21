@@ -577,7 +577,6 @@ void loop()
  }
 
 
-
     void Timer100ms(void)
   {
 
@@ -588,102 +587,21 @@ void loop()
      TEMPORIZADOR_OUT4++;
   }
 
-
-
   void InicializarVariables(void)
 { 
 
-r_eeprom(DESTINATARIO_1, EE_DESTINATARIO_1, 14);
-r_eeprom(DESTINATARIO_2, EE_DESTINATARIO_2, 14);
-r_eeprom(DESTINATARIO_3, EE_DESTINATARIO_3, 14);
-r_eeprom(DESTINATARIO_4, EE_DESTINATARIO_4, 14);
-r_eeprom(DESTINATARIO_5, EE_DESTINATARIO_5, 14);
-r_eeprom(DESTINATARIO_6, EE_DESTINATARIO_6, 14);
-r_eeprom(DESTINATARIO_7, EE_DESTINATARIO_7, 14);
-r_eeprom(DESTINATARIO_8, EE_DESTINATARIO_8, 14);
-r_eeprom(DESTINATARIO_9, EE_DESTINATARIO_9, 14);
-r_eeprom(DESTINATARIO_10, EE_DESTINATARIO_10,14);
+    r_eeprom(DESTINATARIO_1, EE_DESTINATARIO_1, 14);
+    r_eeprom(DESTINATARIO_2, EE_DESTINATARIO_2, 14);
+    r_eeprom(DESTINATARIO_3, EE_DESTINATARIO_3, 14);
+    r_eeprom(DESTINATARIO_4, EE_DESTINATARIO_4, 14);
+    r_eeprom(DESTINATARIO_5, EE_DESTINATARIO_5, 14);
+    r_eeprom(DESTINATARIO_6, EE_DESTINATARIO_6, 14);
+    r_eeprom(DESTINATARIO_7, EE_DESTINATARIO_7, 14);
+    r_eeprom(DESTINATARIO_8, EE_DESTINATARIO_8, 14);
+    r_eeprom(DESTINATARIO_9, EE_DESTINATARIO_9, 14);
+    r_eeprom(DESTINATARIO_10, EE_DESTINATARIO_10,14);
 
-r_eeprom(CLAVE, EE_CLAVE,4);
-CLAVE[4]=0;//le agrego un NULL para convertirlo en string
-CLAVE_STRING = CLAVE;
-//Serial.println(CLAVE_STRING);
-
-unsigned char Longitud_IN1_ON;
-Longitud_IN1_ON = EEPROM.read(EE_LONGITUD_IN1_ON );
-r_eeprom(IN1_TXT_ON, EE_TEXTO_IN1_ON, Longitud_IN1_ON );
-IN1_TXT_ON [Longitud_IN1_ON + 1] = 0 ; //NULL
-IN1_TXT_ON_STRING = IN1_TXT_ON;
-//Serial.println(Longitud_IN1_ON);
-Serial.println(IN1_TXT_ON_STRING);
-
-Serial.println();
-
-unsigned char Longitud_IN1_OFF;
-Longitud_IN1_OFF = EEPROM.read(EE_LONGITUD_IN1_OFF );
-r_eeprom(IN1_TXT_OFF,EE_TEXTO_IN1_OFF,Longitud_IN1_OFF);
-IN1_TXT_OFF [Longitud_IN1_OFF + 1]=0; //NULL
-IN1_TXT_OFF_STRING = IN1_TXT_OFF;
-//Serial.println(Longitud_IN1_OFF);
-Serial.println(IN1_TXT_OFF_STRING);
-
-
-unsigned char Longitud_IN2_ON;
-Longitud_IN2_ON = EEPROM.read(EE_LONGITUD_IN2_ON );
-r_eeprom(IN2_TXT_ON,EE_TEXTO_IN2_ON,Longitud_IN2_ON);
-IN2_TXT_ON [Longitud_IN2_ON + 1]=0; //NULL
-IN2_TXT_ON_STRING = IN2_TXT_ON;
-//Serial.println(Longitud_IN2_ON);
-Serial.println(IN2_TXT_ON_STRING);
-
-Serial.println();
-unsigned char Longitud_IN2_OFF;
-Longitud_IN2_OFF = EEPROM.read(EE_LONGITUD_IN2_OFF );
-Serial.println(Longitud_IN2_OFF);
-r_eeprom(IN2_TXT_OFF,EE_TEXTO_IN2_OFF,19);
-IN2_TXT_OFF [Longitud_IN2_OFF + 1]=0; //NULL
-IN2_TXT_OFF_STRING = IN2_TXT_OFF;
-
-Serial.println(IN2_TXT_OFF_STRING);
-
-
-
-
-OUT1_TEMPORIZADA = EEPROM.read(EE_OUT1_TEMPORIZADA);
-OUT2_TEMPORIZADA = EEPROM.read(EE_OUT2_TEMPORIZADA);
-OUT3_TEMPORIZADA = EEPROM.read(EE_OUT3_TEMPORIZADA);
-OUT4_TEMPORIZADA = EEPROM.read(EE_OUT4_TEMPORIZADA);
-
-byte OUT1_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT1_1);
-byte OUT1_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT1_2);
-byte SUMA_OUT1_TIEMPO [2] = {OUT1_TIEMPO_2, OUT1_TIEMPO_1};
-
-TIEMPO_OUT1 = ObtenerValor(SUMA_OUT1_TIEMPO, 0);
-
-byte OUT2_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT2_1);
-byte OUT2_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT2_2);
-byte SUMA_OUT2_TIEMPO [2] = {OUT2_TIEMPO_2, OUT2_TIEMPO_1};
-
-TIEMPO_OUT2 = ObtenerValor(SUMA_OUT2_TIEMPO, 0);
-
-byte OUT3_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT3_1);
-byte OUT3_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT3_2);
-byte SUMA_OUT3_TIEMPO [2] = {OUT3_TIEMPO_2, OUT3_TIEMPO_1};
-
-TIEMPO_OUT3 = ObtenerValor(SUMA_OUT3_TIEMPO, 0);
-
-unsigned char a,d;
-//
-//Serial.print(F("Destinatario 1:"));
-//for (a=0;a<15;a++)
-//{
-// Serial.print(char(DESTINATARIO_1[a]));
-//}
-
-VALOR = EEPROM.read(EE_CANTIDAD_DESTINOS);
-
-CANTIDAD_DESTINOS = VALOR-48;
-
+     unsigned char d;
     for (d=0;d<14;d++)
     {
      DESTINOS[0][d]=DESTINATARIO_1[d];
@@ -698,7 +616,59 @@ CANTIDAD_DESTINOS = VALOR-48;
      DESTINOS[9][d]=DESTINATARIO_10[d];
     }
 
- return;
+    r_eeprom(CLAVE, EE_CLAVE,4);
+    CLAVE[4]=0;//le agrego un NULL para convertirlo en string
+    CLAVE_STRING = CLAVE;
+    
+    unsigned char Longitud_IN1_ON;
+    Longitud_IN1_ON = EEPROM.read(EE_LONGITUD_IN1_ON );
+    r_eeprom(IN1_TXT_ON, EE_TEXTO_IN1_ON, Longitud_IN1_ON );
+    IN1_TXT_ON [Longitud_IN1_ON + 1] = 0 ; //NULL
+    IN1_TXT_ON_STRING = IN1_TXT_ON;
+    
+    unsigned char Longitud_IN1_OFF;
+    Longitud_IN1_OFF = EEPROM.read(EE_LONGITUD_IN1_OFF );
+    r_eeprom(IN1_TXT_OFF,EE_TEXTO_IN1_OFF,Longitud_IN1_OFF);
+    IN1_TXT_OFF [Longitud_IN1_OFF + 1]=0; //NULL
+    IN1_TXT_OFF_STRING = IN1_TXT_OFF;
+    
+    unsigned char Longitud_IN2_ON;
+    Longitud_IN2_ON = EEPROM.read(EE_LONGITUD_IN2_ON );
+    r_eeprom(IN2_TXT_ON,EE_TEXTO_IN2_ON,Longitud_IN2_ON);
+    IN2_TXT_ON [Longitud_IN2_ON + 1]=0; //NULL
+    IN2_TXT_ON_STRING = IN2_TXT_ON;
+    
+    unsigned char Longitud_IN2_OFF;
+    Longitud_IN2_OFF = EEPROM.read(EE_LONGITUD_IN2_OFF );
+    r_eeprom(IN2_TXT_OFF,EE_TEXTO_IN2_OFF,19);
+    IN2_TXT_OFF [Longitud_IN2_OFF + 1]=0; //NULL
+    IN2_TXT_OFF_STRING = IN2_TXT_OFF;
+    
+    OUT1_TEMPORIZADA = EEPROM.read(EE_OUT1_TEMPORIZADA);
+    OUT2_TEMPORIZADA = EEPROM.read(EE_OUT2_TEMPORIZADA);
+    OUT3_TEMPORIZADA = EEPROM.read(EE_OUT3_TEMPORIZADA);
+    
+    byte OUT1_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT1_1);
+    byte OUT1_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT1_2);
+    byte SUMA_OUT1_TIEMPO [2] = {OUT1_TIEMPO_2, OUT1_TIEMPO_1};
+    
+    TIEMPO_OUT1 = ObtenerValor(SUMA_OUT1_TIEMPO, 0);
+    
+    byte OUT2_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT2_1);
+    byte OUT2_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT2_2);
+    byte SUMA_OUT2_TIEMPO [2] = {OUT2_TIEMPO_2, OUT2_TIEMPO_1};
+    
+    TIEMPO_OUT2 = ObtenerValor(SUMA_OUT2_TIEMPO, 0);
+    
+    byte OUT3_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT3_1);
+    byte OUT3_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT3_2);
+    byte SUMA_OUT3_TIEMPO [2] = {OUT3_TIEMPO_2, OUT3_TIEMPO_1};
+    
+    TIEMPO_OUT3 = ObtenerValor(SUMA_OUT3_TIEMPO, 0);
+    VALOR = EEPROM.read(EE_CANTIDAD_DESTINOS);
+    CANTIDAD_DESTINOS = VALOR-48;   
+    Imprimir_Configuracion();  
+    return;
   
 }
 
@@ -1068,6 +1038,17 @@ void r_eeprom(unsigned char *pDato, unsigned int DirEE, unsigned char cL_Cantida
   return;
 }
 
+void Leer_Destinos(unsigned char *pDato)
+{
+  static unsigned char i;
+  for(i=0; i<14;i++)
+  {
+    Serial.print(char(pDato[i]));
+  }
+  Serial.println();
+  return;
+}
+
 
 
 unsigned int ObtenerValor(byte paquete [], byte i)
@@ -1079,9 +1060,37 @@ unsigned int ObtenerValor(byte paquete [], byte i)
   return valor;
 }
 
-void RX (void)
+void Imprimir_Configuracion(void)
 {
 
-  
+ Serial.print(F("========== CONFIGURACIONES DE EQUIPO GSM I/O ================="));
+ Serial.println();
+ Serial.println();
+ Serial.print(F("CLAVE CONTROL SALIDAS =    "));Serial.println(CLAVE_STRING);
+ Serial.print(F("CANTIDAD DE USUARIOS =     "));
+ Serial.print(CANTIDAD_DESTINOS);
+ Serial.println();
+ Serial.print(F("DESTINATARIO 1 =           "));Leer_Destinos(DESTINATARIO_1);
+ Serial.print(F("DESTINATARIO 2 =           "));Leer_Destinos(DESTINATARIO_2);
+ Serial.print(F("DESTINATARIO 3 =           "));Leer_Destinos(DESTINATARIO_3);
+ Serial.print(F("DESTINATARIO 4 =           "));Leer_Destinos(DESTINATARIO_4);
+ Serial.print(F("DESTINATARIO 5 =           "));Leer_Destinos(DESTINATARIO_5);
+ Serial.print(F("DESTINATARIO 6 =           "));Leer_Destinos(DESTINATARIO_6);
+ Serial.print(F("DESTINATARIO 7 =           "));Leer_Destinos(DESTINATARIO_7);
+ Serial.print(F("DESTINATARIO 8 =           "));Leer_Destinos(DESTINATARIO_8);
+ Serial.print(F("DESTINATARIO 9 =           "));Leer_Destinos(DESTINATARIO_9);
+ Serial.print(F("DESTINATARIO 10 =          "));Leer_Destinos(DESTINATARIO_10);
+ Serial.print(F("TEXTO ENT. 1 ON =          " ));Serial.println(IN1_TXT_ON_STRING);
+ Serial.print(F("TEXTO ENT. 1 OFF =         " ));Serial.println(IN1_TXT_OFF_STRING);
+ Serial.print(F("TEXTO ENT. 2 ON =          " ));Serial.println(IN2_TXT_ON_STRING);
+ Serial.print(F("TEXTO ENT. 2 OFF =         " ));Serial.println(IN2_TXT_OFF_STRING);
+ Serial.print(F("SALIDA 1 TEMPORIZADA =     " ));Serial.println(OUT1_TEMPORIZADA);
+ Serial.print(F("SALIDA 2 TEMPORIZADA =     " ));Serial.println(OUT2_TEMPORIZADA);
+ Serial.print(F("SALIDA 3 TEMPORIZADA =     " ));Serial.println(OUT3_TEMPORIZADA);
+ Serial.print(F("SALIDA 1 TIEMPO =          " ));Serial.print(TIEMPO_OUT1);Serial.print(F(" Segundos" ));
+ Serial.println();
+ Serial.print(F("SALIDA 2 TIEMPO =          " ));Serial.print(TIEMPO_OUT2);Serial.print(F(" Segundos" ));
+ Serial.println();
+ Serial.print(F("SALIDA 3 TIEMPO =          " ));Serial.print(TIEMPO_OUT3);Serial.print(F(" Segundos" ));  
 
 }
