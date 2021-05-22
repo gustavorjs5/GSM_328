@@ -103,14 +103,15 @@ bool OUT1_TEMPORIZADA;
 bool OUT2_TEMPORIZADA;
 bool OUT3_TEMPORIZADA;
 bool OUT4_TEMPORIZADA;
+bool Respuesta_CMD = false;
 static char callerIDbuffer[15];     
 String static Recibir;
-const  char OUT1ON                     [] PROGMEM = "OUT1/ON";
-const  char OUT1OFF                    [] PROGMEM = "OUT1/OFF";
-const  char OUT2ON                     [] PROGMEM = "OUT2/ON";
-const  char OUT2OFF                    [] PROGMEM = "OUT2/OFF";
-const  char OUT3ON                     [] PROGMEM = "OUT3/ON";
-const  char OUT3OFF                    [] PROGMEM = "OUT3/OFF";
+const  char OUT1ON                     [] PROGMEM = "OUT1/ON/";
+const  char OUT1OFF                    [] PROGMEM = "OUT1/OFF/";
+const  char OUT2ON                     [] PROGMEM = "OUT2/ON/";
+const  char OUT2OFF                    [] PROGMEM = "OUT2/OFF/";
+const  char OUT3ON                     [] PROGMEM = "OUT3/ON/";
+const  char OUT3OFF                    [] PROGMEM = "OUT3/OFF/";
 const unsigned char RESP_CONEXION      [] PROGMEM = "CNTOK";
 const unsigned char RESP_DESCONEXION   [] PROGMEM = "DCNTOK";
 const unsigned char CONECTAR           [] PROGMEM = "CONECTAR";
@@ -137,8 +138,8 @@ const unsigned char RESP_OUT2_OFF      [] PROGMEM = "S2OFOK";
 const unsigned char RESP_OUT3_OFF      [] PROGMEM = "S3OFFOK";
 const unsigned char RESP_OUTS_ON       [] PROGMEM = "SONOK";
 const unsigned char RESP_OUTS_OFF      [] PROGMEM = "SOFFOK";
-const unsigned char OUTS_ON            [] PROGMEM = "OUTS/ON";
-const unsigned char OUTS_OFF           [] PROGMEM = "OUTS/OFF";
+const unsigned char OUTS_ON            [] PROGMEM = "OUTS/ON/";
+const unsigned char OUTS_OFF           [] PROGMEM = "OUTS/OFF/";
 const unsigned char OUT1_TIEMPO        [] PROGMEM = "S1TOK";
 const unsigned char OUT2_TIEMPO        [] PROGMEM = "S2TOK";
 const unsigned char OUT3_TIEMPO        [] PROGMEM = "S3TOK";
@@ -169,8 +170,7 @@ void setup()
   pinMode(LED_AUX, OUTPUT);
   
   swseri.begin(9600);
-  Serial.begin(9600);
-  
+  Serial.begin(9600);  
   Timer1.initialize(1000000);                   // Dispara cada 100 ms
   Timer1.attachInterrupt(Timer100ms);           // Activa la interrupcion y la asocia a Timer100ms 
   ESTADO_ANTERIOR_IN1 = HIGH;
@@ -183,13 +183,13 @@ void setup()
       //while (1);
     }
 
-unsigned char b;
-for (b=0;b<21;b++)
-{
-fona.deleteSMS(b);
-}
-  swseri.print("AT+CNMI=2,1\r\n");  //configurar el FONA para enviar una notificación + CMTI cuando se reciba un SMS
-  bG_PrimeraEntrada=true;
+    unsigned char b;
+    for (b=0;b<21;b++)
+    {
+    fona.deleteSMS(b);
+    }
+      swseri.print("AT+CNMI=2,1\r\n");  //configurar el FONA para enviar una notificación + CMTI cuando se reciba un SMS
+      bG_PrimeraEntrada=true;
 
 }
 
@@ -204,7 +204,6 @@ void loop()
      InicializarVariables();
      bG_PrimeraEntrada = false;
     }
-
        if (Estado_Equipo >= 1) // ESTADO DEL EQUIPO CADA 1 SEGUNDOS CAMBIA ESTADO DE LED
          {
           Estado_Equipo=0;
@@ -228,9 +227,9 @@ void loop()
               } else {
                Serial.println(F("ERROR"));
               }
-              delay(2000);
+              delay(5000);
               } 
-             ESTADO_ANTERIOR_IN1=LOW;
+               ESTADO_ANTERIOR_IN1=LOW;
              
           }   
         
@@ -251,7 +250,7 @@ void loop()
                   } else {
                    Serial.println(F("ERROR"));
                   }
-                  delay(2000);
+                  delay(5000);
              }
              ESTADO_ANTERIOR_IN1=HIGH;
            }
@@ -272,7 +271,7 @@ void loop()
                   } else {
                    Serial.println(F("ERROR"));
                   }
-                  delay(2000);
+                  delay(5000);
               }
              ESTADO_ANTERIOR_IN2=LOW;
             } 
@@ -291,7 +290,7 @@ void loop()
                 } else {
                  Serial.println(F("ERROR"));
                 }
-                 delay(2000);
+                 delay(5000);
             }
               ESTADO_ANTERIOR_IN2=HIGH;
            }
@@ -304,12 +303,7 @@ void loop()
         char Texto_1[]="INA1";
         int  Valor_1=analogRead(A1);
         sprintf(Concatenacion_1,"%s = %i",Texto_1,Valor_1);
-        if (!fona.sendSMS(callerIDbuffer,Concatenacion_1)) 
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-        }  
+        fona.sendSMS(callerIDbuffer,Concatenacion_1);
         Recibir ="SALIR";    
   }
 
@@ -319,12 +313,7 @@ void loop()
         char Texto_2[]="INA2";
         int  Valor_2=analogRead(A0);
         sprintf(Concatenacion_2,"%s = %i",Texto_2,Valor_2);
-        if (!fona.sendSMS(callerIDbuffer,Concatenacion_2)) 
-        {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-        }  
+        fona.sendSMS(callerIDbuffer,Concatenacion_2); 
         Recibir ="SALIR";    
   }
 
@@ -333,12 +322,7 @@ void loop()
         char Concatenacion_3 [15];
         char Texto_3[]="SA";
         sprintf(Concatenacion_3,"%s=%i",Texto_3,ESTADO_SALIDAS);
-        if (!fona.sendSMS(callerIDbuffer,Concatenacion_3)) 
-        {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-        }  
+        fona.sendSMS(callerIDbuffer,Concatenacion_3); 
         Recibir ="SALIR";    
   }
 
@@ -347,12 +331,7 @@ void loop()
         char Concatenacion_4 [15];
         char Texto_4[]="EN";
         sprintf(Concatenacion_4,"%s=%i",Texto_4,ESTADO_ENTRADAS);
-        if (!fona.sendSMS(callerIDbuffer,Concatenacion_4)) 
-        {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-        }  
+        fona.sendSMS(callerIDbuffer,Concatenacion_4);   
         Recibir ="SALIR";    
   }
 
@@ -599,7 +578,7 @@ void loop()
     r_eeprom(DESTINATARIO_7, EE_DESTINATARIO_7, 14);
     r_eeprom(DESTINATARIO_8, EE_DESTINATARIO_8, 14);
     r_eeprom(DESTINATARIO_9, EE_DESTINATARIO_9, 14);
-    r_eeprom(DESTINATARIO_10, EE_DESTINATARIO_10,14);
+    r_eeprom(DESTINATARIO_10,EE_DESTINATARIO_10,14);
 
      unsigned char d;
     for (d=0;d<14;d++)
@@ -666,8 +645,39 @@ void loop()
     
     TIEMPO_OUT3 = ObtenerValor(SUMA_OUT3_TIEMPO, 0);
     VALOR = EEPROM.read(EE_CANTIDAD_DESTINOS);
-    CANTIDAD_DESTINOS = VALOR-48;   
-    Imprimir_Configuracion();  
+    CANTIDAD_DESTINOS = VALOR-48;  
+
+//     
+// Serial.print(F("========== CONFIGURACIONES DE EQUIPO GSM I/O ================="));
+// Serial.println();
+// Serial.println();
+// Serial.print(F("CLAVE CONTROL SALIDAS =    "));Serial.println(CLAVE_STRING);
+// Serial.print(F("CANTIDAD DE USUARIOS =     "));
+// Serial.print(CANTIDAD_DESTINOS);
+// Serial.println();
+// Serial.print(F("DESTINATARIO 1 =           "));Leer_Destinos(DESTINATARIO_1);
+// Serial.print(F("DESTINATARIO 2 =           "));Leer_Destinos(DESTINATARIO_2);
+// Serial.print(F("DESTINATARIO 3 =           "));Leer_Destinos(DESTINATARIO_3);
+// Serial.print(F("DESTINATARIO 4 =           "));Leer_Destinos(DESTINATARIO_4);
+// Serial.print(F("DESTINATARIO 5 =           "));Leer_Destinos(DESTINATARIO_5);
+// Serial.print(F("DESTINATARIO 6 =           "));Leer_Destinos(DESTINATARIO_6);
+// Serial.print(F("DESTINATARIO 7 =           "));Leer_Destinos(DESTINATARIO_7);
+// Serial.print(F("DESTINATARIO 8 =           "));Leer_Destinos(DESTINATARIO_8);
+// Serial.print(F("DESTINATARIO 9 =           "));Leer_Destinos(DESTINATARIO_9);
+// Serial.print(F("DESTINATARIO 10 =          "));Leer_Destinos(DESTINATARIO_10);
+// Serial.print(F("TEXTO ENT. 1 ON =          " ));Serial.println(IN1_TXT_ON_STRING);
+// Serial.print(F("TEXTO ENT. 1 OFF =         " ));Serial.println(IN1_TXT_OFF_STRING);
+// Serial.print(F("TEXTO ENT. 2 ON =          " ));Serial.println(IN2_TXT_ON_STRING);
+// Serial.print(F("TEXTO ENT. 2 OFF =         " ));Serial.println(IN2_TXT_OFF_STRING);
+// Serial.print(F("SALIDA 1 TEMPORIZADA =     " ));Serial.println(OUT1_TEMPORIZADA);
+// Serial.print(F("SALIDA 2 TEMPORIZADA =     " ));Serial.println(OUT2_TEMPORIZADA);
+// Serial.print(F("SALIDA 3 TEMPORIZADA =     " ));Serial.println(OUT3_TEMPORIZADA);
+// Serial.print(F("SALIDA 1 TIEMPO =          " ));Serial.print(TIEMPO_OUT1);Serial.print(F(" Segundos" ));
+// Serial.println();
+// Serial.print(F("SALIDA 2 TIEMPO =          " ));Serial.print(TIEMPO_OUT2);Serial.print(F(" Segundos" ));
+// Serial.println();
+// Serial.print(F("SALIDA 3 TIEMPO =          " ));Serial.print(TIEMPO_OUT3);Serial.print(F(" Segundos" )); 
+   // Imprimir_Configuracion();  
     return;
   
 }
@@ -677,251 +687,242 @@ void Programacion(void)
 {
   while(PROGRAMACION == true)
   {
-//
-//Serial.println("ESTOY AQUI");
 
+            if (Respuesta_CMD == true)  
+            {          
+              fona.sendSMS(callerIDbuffer, "CMDOK");      
+              Respuesta_CMD = false;                
+            }
 
          if (Recibir.startsWith("U", 0)) // registrar cantidad de destinatarios
             {
               Recibir.remove(0, 1);              
-              EEPROM.write(141,Recibir[0]);
-              if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[38])))))
-                 {
-                  Serial.println(F("Confirmacion Enviada"));
-                  } else {
-                  Serial.println(F("No se envio confirmacion"));
-                  }                        
-              Recibir= "SALIR";
+              EEPROM.write(141,Recibir[0]);         
+              Respuesta_CMD = true; 
+              Recibir= "SALIR";    
             }
           
-         else if (Recibir.startsWith("1", 0)) // registrar destino 1
+          if (Recibir.startsWith("1", 0)) // registrar destino 1
           {
-              Recibir.remove(0, 1); 
-
-                for(i=0;i<14;i++)
-                {             
-                  EEPROM.write(i,Recibir[i]);            
+                Recibir.remove(0, 1); 
+                unsigned char t=0;
+                for(t=0;t<14;t++)
+                {                             
+                  EEPROM.write(t,Recibir[t]);                                
                 }
-//                fona.sendSMS(callerIDbuffer,"D1OK");
-              }
+                 Respuesta_CMD = true;   
+            }
 
-         else if (Recibir.startsWith("2", 0)) // registrar destino 2
+         if (Recibir.startsWith("2", 0)) // registrar destino 2
           {
               Recibir.remove(0, 1); 
                   for(i=14;i<28;i++)
                 {             
-                  EEPROM.write(i,Recibir[i-14]);            
+                  EEPROM.write(i,Recibir[i-14]); 
+                  Respuesta_CMD = true;              
                 }
-//                fona.sendSMS(callerIDbuffer,"D2OK");
            }
-         else  if (Recibir.startsWith("3", 0)) // registrar destino 3
+         if(Recibir.startsWith("3", 0)) // registrar destino 3
           {
                 Recibir.remove(0, 1); 
                 for(i=28;i<42;i++)
                 {             
-                  EEPROM.write(i,Recibir[i-28]);            
+                  EEPROM.write(i,Recibir[i-28]); 
+                  Respuesta_CMD = true;                 
                 }
-//                fona.sendSMS(callerIDbuffer,"D3OK");
+
            }
 
-          else if (Recibir.startsWith("4", 0)) // registrar destino 4
+          if (Recibir.startsWith("4", 0)) // registrar destino 4
             {
                 Recibir.remove(0, 1); 
                   for(i=42;i<56;i++)
                   {             
-                  EEPROM.write(i,Recibir[i-42]);            
+                  EEPROM.write(i,Recibir[i-42]);   
+                  Respuesta_CMD = true;               
                   }
-//                  fona.sendSMS(callerIDbuffer,"D4OK");
+
             }
-         else if (Recibir.startsWith("5", 0)) // registrar destino 5
+          if (Recibir.startsWith("5", 0)) // registrar destino 5
           {
                 Recibir.remove(0, 1); 
                   for(i=56;i<70;i++)
                   {             
-                    EEPROM.write(i,Recibir[i-56]);            
+                    EEPROM.write(i,Recibir[i-56]); 
+                    Respuesta_CMD = true;             
                   }
-//                  fona.sendSMS(callerIDbuffer,"D5OK");
+
            }
 
-          else if (Recibir.startsWith("6", 0)) // registrar destino 6
+          if (Recibir.startsWith("6", 0)) // registrar destino 6
               {
                 Recibir.remove(0, 1); 
                   for(i=70;i<84;i++)
                   {             
-                  EEPROM.write(i,Recibir[i-70]);         
+                  EEPROM.write(i,Recibir[i-70]);  
+                  Respuesta_CMD = true;             
                   }
-//                  fona.sendSMS(callerIDbuffer,"D6OK");
+
               }
-           else if (Recibir.startsWith("7", 0)) // registrar destino 7
+           if (Recibir.startsWith("7", 0)) // registrar destino 7
              {
                 Recibir.remove(0, 1); 
                     for(i=84;i<98;i++)
                     {             
-                    EEPROM.write(i,Recibir[i-84]);            
+                    EEPROM.write(i,Recibir[i-84]); 
+                    Respuesta_CMD = true;               
                     }
-//                    fona.sendSMS(callerIDbuffer,"D7OK");
+
               }
 
-          else if (Recibir.startsWith("8", 0)) // registrar destino 8
+          if (Recibir.startsWith("8", 0)) // registrar destino 8
               {
                 Recibir.remove(0, 1); 
                   for(i=98;i<112;i++)
                   {             
-                  EEPROM.write(i,Recibir[i-98]);            
+                  EEPROM.write(i,Recibir[i-98]);  ; 
+                  Respuesta_CMD = true;                
                   }
-//                  fona.sendSMS(callerIDbuffer,"D8OK");
+
               }
-          else  if (Recibir.startsWith("9", 0)) // registrar destino 9
+          if (Recibir.startsWith("9", 0)) // registrar destino 9
              {
                 Recibir.remove(0, 1); 
                   for(i=112;i<126;i++)
                   {             
-                  EEPROM.write(i,Recibir[i-112]);            
+                  EEPROM.write(i,Recibir[i-112]);  
+                  Respuesta_CMD = true;                 
                   }
-//                  fona.sendSMS(callerIDbuffer,"D9OK");
              }
 
-          else if (Recibir.startsWith("0", 0)) // registrar destino 10
+          if (Recibir.startsWith("0", 0)) // registrar destino 10
               {
                 Recibir.remove(0, 1); 
                   for(i=126;i<140;i++)
                   {             
-                  EEPROM.write(i,Recibir[i-126]);            
+                    EEPROM.write(i,Recibir[i-126]);   
+                    Respuesta_CMD = true;   
                   }
-//                  fona.sendSMS(callerIDbuffer,"D10OK");
+
               }
 
-         else  if (Recibir.startsWith("TX1ON", 0)) // TEXTO ENTRADA 1 ACTIVA
+         if (Recibir.startsWith("TX1ON", 0)) // TEXTO ENTRADA 1 ACTIVA
              {
                   Recibir.remove(0, 5); 
-                  Serial.println(Recibir);
                   LONG_TXT_IN1_ON = Recibir.length();
                   EEPROM.write(EE_LONGITUD_IN1_ON ,LONG_TXT_IN1_ON); 
-                  Serial.println(LONG_TXT_IN1_ON);
                   for(i=158;i< (158+LONG_TXT_IN1_ON);i++)
                   {             
                   EEPROM.write(i,Recibir[i-158]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"TX1ONOK");
+                  Respuesta_CMD = true;
+                  Recibir = "SALIR";
              }
-          else  if (Recibir.startsWith("TX1OFF", 0)) // TEXTO ENTRADA 1 ACTIVA
+          if (Recibir.startsWith("TX1OFF", 0)) // TEXTO ENTRADA 1 ACTIVA
              {
                   Recibir.remove(0, 6); 
-                  Serial.println(Recibir);
                   LONG_TXT_IN1_OFF = Recibir.length(); 
                   EEPROM.write(EE_LONGITUD_IN1_OFF ,LONG_TXT_IN1_OFF); 
-                  Serial.println(LONG_TXT_IN1_OFF);
                   for(i=198;i< (198+LONG_TXT_IN1_OFF);i++)
                   {             
                   EEPROM.write(i,Recibir[i-198]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"TX1OFFOK");
+                  Respuesta_CMD = true;
+                  Recibir = "SALIR";
              }
 
-         else  if (Recibir.startsWith("TX2ON", 0)) // TEXTO ENTRADA 1 ACTIVA
+         if (Recibir.startsWith("TX2ON", 0)) // TEXTO ENTRADA 1 ACTIVA
              {
                   Recibir.remove(0, 5); 
-                  Serial.println(Recibir);
                   LONG_TXT_IN2_ON = Recibir.length(); 
                   EEPROM.write(EE_LONGITUD_IN2_ON ,LONG_TXT_IN2_ON); 
-                  Serial.println(LONG_TXT_IN2_ON );
                   for(i=238;i< (238+LONG_TXT_IN2_ON );i++)
                   {             
                   EEPROM.write(i,Recibir[i-238]);            
                   }
-
-                  
-                  fona.sendSMS(callerIDbuffer,"TX2ONOK");
+                  Respuesta_CMD = true;
                   Recibir = "SALIR";
              }
 
-          else  if (Recibir.startsWith("TX2OFF", 0)) // TEXTO ENTRADA 1 ACTIVA
+          if (Recibir.startsWith("TX2OFF", 0)) // TEXTO ENTRADA 1 ACTIVA
              {
                   Recibir.remove(0, 6); 
-                  Serial.println(Recibir);
                   LONG_TXT_IN2_OFF  = Recibir.length(); 
                   EEPROM.write(EE_LONGITUD_IN2_OFF ,LONG_TXT_IN2_OFF); 
-                  Serial.println(LONG_TXT_IN2_OFF);
                   unsigned int j=0;
                   for(j=278;j <(278+LONG_TXT_IN2_OFF);j++)
                   {         
                   EEPROM.write(j,Recibir[j-278]);            
                   }
-                  fona.sendSMS(callerIDbuffer,"TX2OFFOK");
+                  Respuesta_CMD = true;
                   Recibir = "SALIR";
              }
 
-           else if (Recibir.startsWith("C", 0)) // registra clave
+           if (Recibir.startsWith("C", 0)) // registra clave
               {
-                 Recibir.remove(0, 1); 
-                for(i=154;i<158;i++)
-                {             
+                  Recibir.remove(0, 1); 
+                  for(i=154;i<158;i++)
+                  {             
                   EEPROM.write(i,Recibir[i-154]);          
-                }
-                 if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[37])))))
-                 {
-                  Serial.println(F("Confirmacion Enviada"));
-                  } else {
-                  Serial.println(F("No se envio confirmacion"));
                   }
+                  Respuesta_CMD = true;
+                  Recibir = "SALIR";
               }
               
-            else if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[12]))))
+            if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[12]))))
               {
-              EEPROM.write(EE_OUT1_TEMPORIZADA, 1); 
-              fona.sendSMS(callerIDbuffer,"S1SOK");
-              Recibir = "SALIR";               
+                EEPROM.write(EE_OUT1_TEMPORIZADA, 1); 
+                Respuesta_CMD = true;
+                Recibir = "SALIR";               
               }
               
              if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[15]))))
               {
-              EEPROM.write(EE_OUT1_TEMPORIZADA, 0);
-              fona.sendSMS(callerIDbuffer,"S1NOK");
-                  Recibir = "SALIR"; 
+                EEPROM.write(EE_OUT1_TEMPORIZADA, 0);
+                Respuesta_CMD = true;
+                Recibir = "SALIR"; 
               }
-            else if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[13]))))
+            if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[13]))))
               {
-              EEPROM.write(EE_OUT2_TEMPORIZADA, 1);
-              fona.sendSMS(callerIDbuffer,"S2SOK"); 
-              Recibir = "SALIR"; 
+                EEPROM.write(EE_OUT2_TEMPORIZADA, 1);
+                Respuesta_CMD = true; 
+                Recibir = "SALIR"; 
               }
-             else if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[16]))))
+             if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[16]))))
               {
-              EEPROM.write(EE_OUT2_TEMPORIZADA, 0);
-              fona.sendSMS(callerIDbuffer,"S2NOK");
-              Recibir = "SALIR"; 
+                EEPROM.write(EE_OUT2_TEMPORIZADA, 0);
+                Respuesta_CMD = true;
+                Recibir = "SALIR"; 
               }
               if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[14]))))
               {
-              EEPROM.write(EE_OUT3_TEMPORIZADA, 1);
-              fona.sendSMS(callerIDbuffer,"S3SOK");
-              Recibir = "SALIR"; 
+                EEPROM.write(EE_OUT3_TEMPORIZADA, 1);
+                Respuesta_CMD = true;
+                Recibir = "SALIR"; 
               }
-           else  if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[17]))))
+           if (Recibir ==  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[17]))))
               {
-              EEPROM.write(EE_OUT3_TEMPORIZADA, 0);
-              fona.sendSMS(callerIDbuffer,"S3NOK");
-              Recibir ="SALIR"; 
+                EEPROM.write(EE_OUT3_TEMPORIZADA, 0);
+                Respuesta_CMD = true;
+                Recibir ="SALIR"; 
               }
 
-
-          else if (Recibir.startsWith("T1/", 0)) // Tiempo de temporizado de la salida 1
+          if (Recibir.startsWith("T1/", 0)) // Tiempo de temporizado de la salida 1
             {
               Recibir.remove(0, 3);
               unsigned int OUT1_TIEMPO;
               OUT1_TIEMPO = Recibir.toInt();            
-              Serial.println(OUT1_TIEMPO);
               byte OUT1_1;
               byte OUT1_2;
               OUT1_1 = OUT1_TIEMPO & 0XFF;
               OUT1_2 = OUT1_TIEMPO >>8&0XFF;
               EEPROM.write(EE_TIEMPO_OUT1_1, OUT1_1);
               EEPROM.write(EE_TIEMPO_OUT1_2, OUT1_2);
-              fona.sendSMS(callerIDbuffer,"T1OK");
+              Respuesta_CMD = true;
               Recibir= "SALIR";
             }
             
-          else  if (Recibir.startsWith("T2/", 0)) // Tiempo de temporizado de la salida 2
+          if (Recibir.startsWith("T2/", 0)) // Tiempo de temporizado de la salida 2
             {
               Recibir.remove(0, 3);
               unsigned int OUT2_TIEMPO;
@@ -932,11 +933,11 @@ void Programacion(void)
               OUT2_2 = OUT2_TIEMPO >>8&0XFF;
               EEPROM.write(EE_TIEMPO_OUT2_1, OUT2_1);
               EEPROM.write(EE_TIEMPO_OUT2_2, OUT2_2);
-              fona.sendSMS(callerIDbuffer,"T2OK");
+              Respuesta_CMD = true;
               Recibir= "SALIR";
             }
 
-           else  if (Recibir.startsWith("T3/", 0)) // Tiempo de temporizado de la salida 3
+           if (Recibir.startsWith("T3/", 0)) // Tiempo de temporizado de la salida 3
             {
               Recibir.remove(0, 3);
               unsigned int OUT3_TIEMPO;
@@ -947,11 +948,11 @@ void Programacion(void)
               OUT3_2 = OUT3_TIEMPO >>8&0XFF;
               EEPROM.write(EE_TIEMPO_OUT3_1, OUT3_1);
               EEPROM.write(EE_TIEMPO_OUT3_2, OUT3_2);
-              fona.sendSMS(callerIDbuffer,"T3OK");
+              Respuesta_CMD = true;
               Recibir= "SALIR";
             }
 
-            else if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[9]))))
+            if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[9]))))
               {
 
                  if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[7])))))
@@ -1060,37 +1061,37 @@ unsigned int ObtenerValor(byte paquete [], byte i)
   return valor;
 }
 
-void Imprimir_Configuracion(void)
-{
-
- Serial.print(F("========== CONFIGURACIONES DE EQUIPO GSM I/O ================="));
- Serial.println();
- Serial.println();
- Serial.print(F("CLAVE CONTROL SALIDAS =    "));Serial.println(CLAVE_STRING);
- Serial.print(F("CANTIDAD DE USUARIOS =     "));
- Serial.print(CANTIDAD_DESTINOS);
- Serial.println();
- Serial.print(F("DESTINATARIO 1 =           "));Leer_Destinos(DESTINATARIO_1);
- Serial.print(F("DESTINATARIO 2 =           "));Leer_Destinos(DESTINATARIO_2);
- Serial.print(F("DESTINATARIO 3 =           "));Leer_Destinos(DESTINATARIO_3);
- Serial.print(F("DESTINATARIO 4 =           "));Leer_Destinos(DESTINATARIO_4);
- Serial.print(F("DESTINATARIO 5 =           "));Leer_Destinos(DESTINATARIO_5);
- Serial.print(F("DESTINATARIO 6 =           "));Leer_Destinos(DESTINATARIO_6);
- Serial.print(F("DESTINATARIO 7 =           "));Leer_Destinos(DESTINATARIO_7);
- Serial.print(F("DESTINATARIO 8 =           "));Leer_Destinos(DESTINATARIO_8);
- Serial.print(F("DESTINATARIO 9 =           "));Leer_Destinos(DESTINATARIO_9);
- Serial.print(F("DESTINATARIO 10 =          "));Leer_Destinos(DESTINATARIO_10);
- Serial.print(F("TEXTO ENT. 1 ON =          " ));Serial.println(IN1_TXT_ON_STRING);
- Serial.print(F("TEXTO ENT. 1 OFF =         " ));Serial.println(IN1_TXT_OFF_STRING);
- Serial.print(F("TEXTO ENT. 2 ON =          " ));Serial.println(IN2_TXT_ON_STRING);
- Serial.print(F("TEXTO ENT. 2 OFF =         " ));Serial.println(IN2_TXT_OFF_STRING);
- Serial.print(F("SALIDA 1 TEMPORIZADA =     " ));Serial.println(OUT1_TEMPORIZADA);
- Serial.print(F("SALIDA 2 TEMPORIZADA =     " ));Serial.println(OUT2_TEMPORIZADA);
- Serial.print(F("SALIDA 3 TEMPORIZADA =     " ));Serial.println(OUT3_TEMPORIZADA);
- Serial.print(F("SALIDA 1 TIEMPO =          " ));Serial.print(TIEMPO_OUT1);Serial.print(F(" Segundos" ));
- Serial.println();
- Serial.print(F("SALIDA 2 TIEMPO =          " ));Serial.print(TIEMPO_OUT2);Serial.print(F(" Segundos" ));
- Serial.println();
- Serial.print(F("SALIDA 3 TIEMPO =          " ));Serial.print(TIEMPO_OUT3);Serial.print(F(" Segundos" ));  
-
-}
+//void Imprimir_Configuracion(void)
+//{
+//
+// Serial.print(F("========== CONFIGURACIONES DE EQUIPO GSM I/O ================="));
+// Serial.println();
+// Serial.println();
+// Serial.print(F("CLAVE CONTROL SALIDAS =    "));Serial.println(CLAVE_STRING);
+// Serial.print(F("CANTIDAD DE USUARIOS =     "));
+// Serial.print(CANTIDAD_DESTINOS);
+// Serial.println();
+// Serial.print(F("DESTINATARIO 1 =           "));Leer_Destinos(DESTINATARIO_1);
+// Serial.print(F("DESTINATARIO 2 =           "));Leer_Destinos(DESTINATARIO_2);
+// Serial.print(F("DESTINATARIO 3 =           "));Leer_Destinos(DESTINATARIO_3);
+// Serial.print(F("DESTINATARIO 4 =           "));Leer_Destinos(DESTINATARIO_4);
+// Serial.print(F("DESTINATARIO 5 =           "));Leer_Destinos(DESTINATARIO_5);
+// Serial.print(F("DESTINATARIO 6 =           "));Leer_Destinos(DESTINATARIO_6);
+// Serial.print(F("DESTINATARIO 7 =           "));Leer_Destinos(DESTINATARIO_7);
+// Serial.print(F("DESTINATARIO 8 =           "));Leer_Destinos(DESTINATARIO_8);
+// Serial.print(F("DESTINATARIO 9 =           "));Leer_Destinos(DESTINATARIO_9);
+// Serial.print(F("DESTINATARIO 10 =          "));Leer_Destinos(DESTINATARIO_10);
+// Serial.print(F("TEXTO ENT. 1 ON =          " ));Serial.println(IN1_TXT_ON_STRING);
+// Serial.print(F("TEXTO ENT. 1 OFF =         " ));Serial.println(IN1_TXT_OFF_STRING);
+// Serial.print(F("TEXTO ENT. 2 ON =          " ));Serial.println(IN2_TXT_ON_STRING);
+// Serial.print(F("TEXTO ENT. 2 OFF =         " ));Serial.println(IN2_TXT_OFF_STRING);
+// Serial.print(F("SALIDA 1 TEMPORIZADA =     " ));Serial.println(OUT1_TEMPORIZADA);
+// Serial.print(F("SALIDA 2 TEMPORIZADA =     " ));Serial.println(OUT2_TEMPORIZADA);
+// Serial.print(F("SALIDA 3 TEMPORIZADA =     " ));Serial.println(OUT3_TEMPORIZADA);
+// Serial.print(F("SALIDA 1 TIEMPO =          " ));Serial.print(TIEMPO_OUT1);Serial.print(F(" Segundos" ));
+// Serial.println();
+// Serial.print(F("SALIDA 2 TIEMPO =          " ));Serial.print(TIEMPO_OUT2);Serial.print(F(" Segundos" ));
+// Serial.println();
+// Serial.print(F("SALIDA 3 TIEMPO =          " ));Serial.print(TIEMPO_OUT3);Serial.print(F(" Segundos" ));  
+// return;
+//}
