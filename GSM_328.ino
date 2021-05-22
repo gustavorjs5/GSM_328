@@ -351,12 +351,8 @@ void loop()
      digitalWrite(RELE_1, HIGH);
       bitWrite(ESTADO_SALIDAS, 0, 1);
      TEMPORIZADOR_OUT1=0;
-     if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[24])))))
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-               }    
+     fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[24]))));
+   
    Recibir ="SALIR"; 
   }
 
@@ -364,25 +360,17 @@ void loop()
   {
    digitalWrite(RELE_1, LOW);
    bitWrite(ESTADO_SALIDAS, 0, 0);
-     if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[27])))))
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-               } 
+   fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[27]))));
+
    Recibir ="SALIR"; 
   }
    else if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[2])))+CLAVE_STRING)
   {
    digitalWrite(RELE_2, HIGH);
-    bitWrite(ESTADO_SALIDAS, 1, 1);
+   bitWrite(ESTADO_SALIDAS, 1, 1);
    Serial.println(Recibir);
-     if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[25])))))
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-               } 
+   fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[25]))));
+
    TEMPORIZADOR_OUT2=0;
    Recibir ="SALIR"; 
   }
@@ -392,12 +380,8 @@ void loop()
    digitalWrite(RELE_2, LOW);
    bitWrite(ESTADO_SALIDAS, 1, 0);
    Serial.println(Recibir);
-     if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[28])))))
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-               } 
+   fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[28]))));
+
    Recibir ="SALIR"; 
   }
 
@@ -407,26 +391,17 @@ void loop()
    bitWrite(ESTADO_SALIDAS, 2, 1);
    Serial.println(Recibir);
    TEMPORIZADOR_OUT3=0;
-     if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[26])))))
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-               } 
+   fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[26]))));
+ 
    Recibir ="SALIR"; 
   }
 
    else  if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[5])))+ CLAVE_STRING)
   {
    digitalWrite(RELE_3, LOW);
-    bitWrite(ESTADO_SALIDAS, 2, 0);
+   bitWrite(ESTADO_SALIDAS, 2, 0);
    Serial.println(Recibir);
-     if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[29])))))
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-               } 
+   fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[29])))); 
    Recibir ="SALIR"; 
   }
 
@@ -441,13 +416,7 @@ void loop()
    TEMPORIZADOR_OUT2=0;
    TEMPORIZADOR_OUT3=0;
    TEMPORIZADOR_OUT4=0;
-     if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[30])))))
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-               }
-   Serial.println(Recibir);
+   fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[30]))));
    Recibir ="SALIR"; 
   }
    else  if (Recibir == strcpy_P(buffer, (char *)pgm_read_word(&(string_table[33])))+CLAVE_STRING)
@@ -457,14 +426,8 @@ void loop()
        digitalWrite(RELE_3, LOW);
        digitalWrite(RELE_4, LOW);
        ESTADO_SALIDAS = 0;
-     if (!fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[31])))))
-       {
-        Serial.println(F("Confirmacion Enviada"));
-        } else {
-        Serial.println(F("No se envio confirmacion"));
-               }
-   Serial.println(Recibir);
-   Recibir ="SALIR"; 
+       fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[31]))));
+       Recibir ="SALIR"; 
   }
 
     else if (OUT1_TEMPORIZADA  == true && TEMPORIZADOR_OUT1 > TIEMPO_OUT1)
