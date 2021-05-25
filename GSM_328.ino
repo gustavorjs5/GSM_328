@@ -321,7 +321,7 @@ void loop()
     {
         char Concatenacion_3 [15];
         char Texto_3[]="SA";
-        sprintf(Concatenacion_3,"%s=%i",Texto_3,ESTADO_SALIDAS);
+        sprintf(Concatenacion_3,"%s = %i",Texto_3,ESTADO_SALIDAS);
         fona.sendSMS(callerIDbuffer,Concatenacion_3); 
         Recibir ="SALIR";    
   }
@@ -330,7 +330,7 @@ void loop()
     {
         char Concatenacion_4 [15];
         char Texto_4[]="EN";
-        sprintf(Concatenacion_4,"%s=%i",Texto_4,ESTADO_ENTRADAS);
+        sprintf(Concatenacion_4,"%s = %i",Texto_4,ESTADO_ENTRADAS);
         fona.sendSMS(callerIDbuffer,Concatenacion_4);   
         Recibir ="SALIR";    
   }
