@@ -809,7 +809,6 @@ void Programacion(void)
                   EEPROM.write(j,Recibir[j-278]);            
                   }
                   Respuesta_CMD = true;
-                  Serial.println(Recibir);
                   Recibir = "SALIR";
              }
 
