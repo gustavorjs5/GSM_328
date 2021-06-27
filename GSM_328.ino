@@ -9,9 +9,9 @@
 #define CONFIG_GSM_RXPIN 3
 #define CONFIG_GSM_TXPIN 2
 #define CONFIG_GSM_BAUDRATE 9600
-#define LED_AUX 9
-#define IN1 A2
-#define IN2 A3
+#define LED_AUX 10
+#define IN1 A3
+#define IN2 A2
 #define RELE_1 4
 #define RELE_2 5
 #define RELE_3 6
@@ -301,7 +301,7 @@ void loop()
   {
         char Concatenacion_1 [15];
         char Texto_1[]="INA1";
-        int  Valor_1=analogRead(A1);
+        int  Valor_1=analogRead(A0);
         sprintf(Concatenacion_1,"%s = %i",Texto_1,Valor_1);
         fona.sendSMS(callerIDbuffer,Concatenacion_1);
         Recibir ="SALIR";    
@@ -311,7 +311,7 @@ void loop()
     {
         char Concatenacion_2 [15];
         char Texto_2[]="INA2";
-        int  Valor_2=analogRead(A0);
+        int  Valor_2=analogRead(A7);
         sprintf(Concatenacion_2,"%s = %i",Texto_2,Valor_2);
         fona.sendSMS(callerIDbuffer,Concatenacion_2); 
         Recibir ="SALIR";    
@@ -370,7 +370,6 @@ void loop()
    bitWrite(ESTADO_SALIDAS, 1, 1);
    Serial.println(Recibir);
    fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[25]))));
-
    TEMPORIZADOR_OUT2=0;
    Recibir ="SALIR"; 
   }
@@ -410,12 +409,10 @@ void loop()
    digitalWrite(RELE_1, HIGH);
    digitalWrite(RELE_2, HIGH);
    digitalWrite(RELE_3, HIGH);
-   digitalWrite(RELE_4, HIGH);
    ESTADO_SALIDAS = 7;
    TEMPORIZADOR_OUT1=0;
    TEMPORIZADOR_OUT2=0;
    TEMPORIZADOR_OUT3=0;
-   TEMPORIZADOR_OUT4=0;
    fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[30]))));
    Recibir ="SALIR"; 
   }
@@ -424,7 +421,6 @@ void loop()
        digitalWrite(RELE_1, LOW);
        digitalWrite(RELE_2, LOW);
        digitalWrite(RELE_3, LOW);
-       digitalWrite(RELE_4, LOW);
        ESTADO_SALIDAS = 0;
        fona.sendSMS(callerIDbuffer, strcpy_P(buffer, (char *)pgm_read_word(&(string_table[31]))));
        Recibir ="SALIR"; 
@@ -450,12 +446,7 @@ void loop()
    TEMPORIZADOR_OUT3=0;
    Recibir ="SALIR"; 
    }
-  else  if (OUT4_TEMPORIZADA  == true && TEMPORIZADOR_OUT4 > TIEMPO_OUT4 )
-   {
-   digitalWrite(RELE_4, LOW);
-   TEMPORIZADOR_OUT4=0;
-   Recibir ="SALIR"; 
-   }
+
    char* bufPtr = fonaNotificationBuffer;    //handy buffer pointer
   
   if (fona.available())      //¿Algún dato disponible del FONA?
@@ -512,7 +503,8 @@ void loop()
 
    else
     {
-      Serial.println("Modo Programacion");   
+      digitalWrite( LED_AUX,HIGH);
+      //Serial.println("Modo Programacion");   
       Programacion(); //llama a la funcion programacion y se queda ahi esta que cambia PROGRAMACION = 0;
       bG_PrimeraEntrada = true; // primera entrada true para que vuelva a configurar las variables leidas de eeprom 
     } 
@@ -526,7 +518,6 @@ void loop()
      TEMPORIZADOR_OUT1++;
      TEMPORIZADOR_OUT2++;
      TEMPORIZADOR_OUT3++;
-     TEMPORIZADOR_OUT4++;
   }
 
   void InicializarVariables(void)
@@ -582,7 +573,7 @@ void loop()
     
     unsigned char Longitud_IN2_OFF;
     Longitud_IN2_OFF = EEPROM.read(EE_LONGITUD_IN2_OFF );
-    r_eeprom(IN2_TXT_OFF,EE_TEXTO_IN2_OFF,19);
+    r_eeprom(IN2_TXT_OFF,EE_TEXTO_IN2_OFF,Longitud_IN2_OFF);
     IN2_TXT_OFF [Longitud_IN2_OFF + 1]=0; //NULL
     IN2_TXT_OFF_STRING = IN2_TXT_OFF;
     
@@ -657,9 +648,9 @@ void Programacion(void)
               Respuesta_CMD = false;                
             }
 
-         if (Recibir.startsWith("U", 0)) // registrar cantidad de destinatarios
+         if (Recibir.startsWith("U/", 0)) // registrar cantidad de destinatarios
             {
-              Recibir.remove(0, 1);              
+              Recibir.remove(0, 2);              
               EEPROM.write(141,Recibir[0]);         
               Respuesta_CMD = true; 
               Recibir= "SALIR";    
@@ -769,9 +760,9 @@ void Programacion(void)
 
               }
 
-         if (Recibir.startsWith("TX1ON", 0)) // TEXTO ENTRADA 1 ACTIVA
+         if (Recibir.startsWith("TX1ON/", 0)) // TEXTO ENTRADA 1 ACTIVA
              {
-                  Recibir.remove(0, 5); 
+                  Recibir.remove(0, 6); 
                   LONG_TXT_IN1_ON = Recibir.length();
                   EEPROM.write(EE_LONGITUD_IN1_ON ,LONG_TXT_IN1_ON); 
                   for(i=158;i< (158+LONG_TXT_IN1_ON);i++)
@@ -781,9 +772,9 @@ void Programacion(void)
                   Respuesta_CMD = true;
                   Recibir = "SALIR";
              }
-          if (Recibir.startsWith("TX1OFF", 0)) // TEXTO ENTRADA 1 ACTIVA
+          if (Recibir.startsWith("TX1OFF/", 0)) // TEXTO ENTRADA 1 ACTIVA
              {
-                  Recibir.remove(0, 6); 
+                  Recibir.remove(0, 7); 
                   LONG_TXT_IN1_OFF = Recibir.length(); 
                   EEPROM.write(EE_LONGITUD_IN1_OFF ,LONG_TXT_IN1_OFF); 
                   for(i=198;i< (198+LONG_TXT_IN1_OFF);i++)
@@ -794,9 +785,9 @@ void Programacion(void)
                   Recibir = "SALIR";
              }
 
-         if (Recibir.startsWith("TX2ON", 0)) // TEXTO ENTRADA 1 ACTIVA
+         if (Recibir.startsWith("TX2ON/", 0)) // TEXTO ENTRADA 1 ACTIVA
              {
-                  Recibir.remove(0, 5); 
+                  Recibir.remove(0, 6); 
                   LONG_TXT_IN2_ON = Recibir.length(); 
                   EEPROM.write(EE_LONGITUD_IN2_ON ,LONG_TXT_IN2_ON); 
                   for(i=238;i< (238+LONG_TXT_IN2_ON );i++)
@@ -807,9 +798,9 @@ void Programacion(void)
                   Recibir = "SALIR";
              }
 
-          if (Recibir.startsWith("TX2OFF", 0)) // TEXTO ENTRADA 1 ACTIVA
+          if (Recibir.startsWith("TX2OFF/", 0)) // TEXTO ENTRADA 2 DESACTIVADA
              {
-                  Recibir.remove(0, 6); 
+                  Recibir.remove(0, 7); 
                   LONG_TXT_IN2_OFF  = Recibir.length(); 
                   EEPROM.write(EE_LONGITUD_IN2_OFF ,LONG_TXT_IN2_OFF); 
                   unsigned int j=0;
@@ -818,12 +809,13 @@ void Programacion(void)
                   EEPROM.write(j,Recibir[j-278]);            
                   }
                   Respuesta_CMD = true;
+                  Serial.println(Recibir);
                   Recibir = "SALIR";
              }
 
-           if (Recibir.startsWith("C", 0)) // registra clave
+           if (Recibir.startsWith("C/", 0)) // registra clave
               {
-                  Recibir.remove(0, 1); 
+                  Recibir.remove(0, 2); 
                   for(i=154;i<158;i++)
                   {             
                   EEPROM.write(i,Recibir[i-154]);          
