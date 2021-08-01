@@ -15,7 +15,7 @@
 #define RELE_1 4
 #define RELE_2 5
 #define RELE_3 6
-#define RELE_4 7
+#define ENTRADA_FABRICA 7
 #define ON    1
 #define OFF   0
 
@@ -36,12 +36,9 @@
 #define EE_TIEMPO_OUT2_2 145
 #define EE_TIEMPO_OUT3_1 146
 #define EE_TIEMPO_OUT3_2 147
-#define EE_TIEMPO_OUT4_1 148
-#define EE_TIEMPO_OUT4_2 149
 #define EE_OUT1_TEMPORIZADA 150
 #define EE_OUT2_TEMPORIZADA 151
 #define EE_OUT3_TEMPORIZADA 152
-#define EE_OUT4_TEMPORIZADA 153
 #define EE_CLAVE                154
 #define EE_TEXTO_IN1_ON         158
 #define EE_TEXTO_IN1_OFF        198
@@ -60,17 +57,17 @@ unsigned char Estado_Equipo;
 unsigned int TEMPORIZADOR_OUT1;
 unsigned int TEMPORIZADOR_OUT2;
 unsigned int TEMPORIZADOR_OUT3;
-unsigned int TEMPORIZADOR_OUT4;
+
 unsigned int TIEMPO_OUT1;
 unsigned int TIEMPO_OUT2;
 unsigned int TIEMPO_OUT3;
-unsigned int TIEMPO_OUT4;
+
 unsigned char i;
 unsigned char CANTIDAD_DESTINOS; 
 unsigned char VALOR;  
 unsigned char ESTADO_SALIDAS;
 unsigned char ESTADO_ENTRADAS;
-unsigned char DESTINATARIO_1[15];  
+static unsigned char DESTINATARIO_1[15];  
 unsigned char DESTINATARIO_2[15];  
 unsigned char DESTINATARIO_3[15];  
 unsigned char DESTINATARIO_4[15];  
@@ -90,7 +87,7 @@ String IN1_TXT_ON_STRING;
 String IN1_TXT_OFF_STRING;
 String IN2_TXT_ON_STRING;
 String IN2_TXT_OFF_STRING;
-char DESTINOS[10][15]; // 10 destinatarios con un maximo de 14 caracteres
+static char DESTINOS[10][15]; // 10 destinatarios con un maximo de 14 caracteres
 char replybuffer[20];                    //este es un gran búfer para las respuestas
 char fonaNotificationBuffer[30];          // 64 para notificaciones del FONA
 char smsBuffer[60];
@@ -102,7 +99,7 @@ bool bG_PrimeraEntrada;
 bool OUT1_TEMPORIZADA;
 bool OUT2_TEMPORIZADA;
 bool OUT3_TEMPORIZADA;
-bool OUT4_TEMPORIZADA;
+
 bool Respuesta_CMD = false;
 static char callerIDbuffer[15];     
 String static Recibir;
@@ -164,9 +161,9 @@ void setup()
   pinMode(RELE_1, OUTPUT);  
   pinMode(RELE_2, OUTPUT);  
   pinMode(RELE_3, OUTPUT); 
-  pinMode(RELE_4, OUTPUT);
   pinMode(IN1, INPUT_PULLUP);
   pinMode(IN2, INPUT_PULLUP);
+  pinMode(ENTRADA_FABRICA, INPUT_PULLUP);
   pinMode(LED_AUX, OUTPUT);
   
   swseri.begin(9600);
@@ -202,6 +199,7 @@ void loop()
    if(bG_PrimeraEntrada == true)  // PRIMERA ENTRADA PARA INICIALIZAR VARIABLES 
     { 
      InicializarVariables();
+          Serial.println(F("INICIO DE VARIABLES"));
      bG_PrimeraEntrada = false;
     }
        if (Estado_Equipo >= 1) // ESTADO DEL EQUIPO CADA 1 SEGUNDOS CAMBIA ESTADO DE LED
@@ -221,7 +219,8 @@ void loop()
 
             for (i=0;i<CANTIDAD_DESTINOS;i++)
               {
-              if (!fona.sendSMS(DESTINOS[i], IN1_TXT_ON)) 
+             if (!fona.sendSMS(DESTINOS[i], IN1_TXT_ON)) 
+              
               {
               Serial.println(F("ENVIADO"));
               } else {
@@ -229,8 +228,7 @@ void loop()
               }
               delay(5000);
               } 
-               ESTADO_ANTERIOR_IN1=LOW;
-             
+               ESTADO_ANTERIOR_IN1=LOW;         
           }   
         
     } 
@@ -240,11 +238,12 @@ void loop()
           delay(10);
         if (digitalRead(IN1)==HIGH && (ESTADO_ANTERIOR_IN1)==LOW) 
            {   
-             bitWrite(ESTADO_ENTRADAS, 0, 1);
+             bitWrite(ESTADO_ENTRADAS, 0, 0);
 
                for (i=0;i<CANTIDAD_DESTINOS;i++)
               {
-                if (!fona.sendSMS(DESTINOS[i], IN1_TXT_OFF)) 
+               if (!fona.sendSMS(DESTINOS[i], IN1_TXT_OFF)) 
+                
                   {
                   Serial.println(F("ENVIADO"));
                   } else {
@@ -503,8 +502,7 @@ void loop()
 
    else
     {
-      digitalWrite( LED_AUX,HIGH);
-      //Serial.println("Modo Programacion");   
+      digitalWrite( LED_AUX,HIGH);  
       Programacion(); //llama a la funcion programacion y se queda ahi esta que cambia PROGRAMACION = 0;
       bG_PrimeraEntrada = true; // primera entrada true para que vuelva a configurar las variables leidas de eeprom 
     } 
@@ -522,6 +520,9 @@ void loop()
 
   void InicializarVariables(void)
 { 
+  
+ unsigned char i;
+ static unsigned char cL_Contador;
 
     r_eeprom(DESTINATARIO_1, EE_DESTINATARIO_1, 14);
     r_eeprom(DESTINATARIO_2, EE_DESTINATARIO_2, 14);
@@ -534,7 +535,7 @@ void loop()
     r_eeprom(DESTINATARIO_9, EE_DESTINATARIO_9, 14);
     r_eeprom(DESTINATARIO_10,EE_DESTINATARIO_10,14);
 
-     unsigned char d;
+     static unsigned char d=0;
     for (d=0;d<14;d++)
     {
      DESTINOS[0][d]=DESTINATARIO_1[d];
@@ -547,8 +548,11 @@ void loop()
      DESTINOS[7][d]=DESTINATARIO_8[d];
      DESTINOS[8][d]=DESTINATARIO_9[d];
      DESTINOS[9][d]=DESTINATARIO_10[d];
+     
     }
 
+
+    
     r_eeprom(CLAVE, EE_CLAVE,4);
     CLAVE[4]=0;//le agrego un NULL para convertirlo en string
     CLAVE_STRING = CLAVE;
@@ -598,40 +602,212 @@ void loop()
     byte SUMA_OUT3_TIEMPO [2] = {OUT3_TIEMPO_2, OUT3_TIEMPO_1};
     
     TIEMPO_OUT3 = ObtenerValor(SUMA_OUT3_TIEMPO, 0);
+    
     VALOR = EEPROM.read(EE_CANTIDAD_DESTINOS);
     CANTIDAD_DESTINOS = VALOR-48;  
 
-//     
-// Serial.print(F("========== CONFIGURACIONES DE EQUIPO GSM I/O ================="));
-// Serial.println();
-// Serial.println();
-// Serial.print(F("CLAVE CONTROL SALIDAS =    "));Serial.println(CLAVE_STRING);
-// Serial.print(F("CANTIDAD DE USUARIOS =     "));
-// Serial.print(CANTIDAD_DESTINOS);
-// Serial.println();
-// Serial.print(F("DESTINATARIO 1 =           "));Leer_Destinos(DESTINATARIO_1);
-// Serial.print(F("DESTINATARIO 2 =           "));Leer_Destinos(DESTINATARIO_2);
-// Serial.print(F("DESTINATARIO 3 =           "));Leer_Destinos(DESTINATARIO_3);
-// Serial.print(F("DESTINATARIO 4 =           "));Leer_Destinos(DESTINATARIO_4);
-// Serial.print(F("DESTINATARIO 5 =           "));Leer_Destinos(DESTINATARIO_5);
-// Serial.print(F("DESTINATARIO 6 =           "));Leer_Destinos(DESTINATARIO_6);
-// Serial.print(F("DESTINATARIO 7 =           "));Leer_Destinos(DESTINATARIO_7);
-// Serial.print(F("DESTINATARIO 8 =           "));Leer_Destinos(DESTINATARIO_8);
-// Serial.print(F("DESTINATARIO 9 =           "));Leer_Destinos(DESTINATARIO_9);
-// Serial.print(F("DESTINATARIO 10 =          "));Leer_Destinos(DESTINATARIO_10);
-// Serial.print(F("TEXTO ENT. 1 ON =          " ));Serial.println(IN1_TXT_ON_STRING);
-// Serial.print(F("TEXTO ENT. 1 OFF =         " ));Serial.println(IN1_TXT_OFF_STRING);
-// Serial.print(F("TEXTO ENT. 2 ON =          " ));Serial.println(IN2_TXT_ON_STRING);
-// Serial.print(F("TEXTO ENT. 2 OFF =         " ));Serial.println(IN2_TXT_OFF_STRING);
-// Serial.print(F("SALIDA 1 TEMPORIZADA =     " ));Serial.println(OUT1_TEMPORIZADA);
-// Serial.print(F("SALIDA 2 TEMPORIZADA =     " ));Serial.println(OUT2_TEMPORIZADA);
-// Serial.print(F("SALIDA 3 TEMPORIZADA =     " ));Serial.println(OUT3_TEMPORIZADA);
-// Serial.print(F("SALIDA 1 TIEMPO =          " ));Serial.print(TIEMPO_OUT1);Serial.print(F(" Segundos" ));
-// Serial.println();
-// Serial.print(F("SALIDA 2 TIEMPO =          " ));Serial.print(TIEMPO_OUT2);Serial.print(F(" Segundos" ));
-// Serial.println();
-// Serial.print(F("SALIDA 3 TIEMPO =          " ));Serial.print(TIEMPO_OUT3);Serial.print(F(" Segundos" )); 
-   // Imprimir_Configuracion();  
+  if(digitalRead(ENTRADA_FABRICA) == 0)
+  {
+  cL_Contador = 0;
+  while(digitalRead(ENTRADA_FABRICA) == 0 && cL_Contador < 50)
+  {
+    cL_Contador++;
+    delay(100);
+    digitalWrite(LED_AUX, !digitalRead(LED_AUX));
+  }
+  if(cL_Contador >= 20) // si mantiene presionado el boton de reinicio por lo menos 22 seg ya entra en el for.
+  {
+    for(cL_Contador = 0; cL_Contador < 100; cL_Contador++)
+    {
+      delay(40);
+      digitalWrite(LED_AUX, !digitalRead(LED_AUX));
+    }
+        for(i= 0;i < 141; i++)
+    {
+    EEPROM.write(i,48);
+
+    }   
+    r_eeprom(DESTINATARIO_1, EE_DESTINATARIO_1, 14);
+    r_eeprom(DESTINATARIO_2, EE_DESTINATARIO_2, 14);
+    r_eeprom(DESTINATARIO_3, EE_DESTINATARIO_3, 14);
+    r_eeprom(DESTINATARIO_4, EE_DESTINATARIO_4, 14);
+    r_eeprom(DESTINATARIO_5, EE_DESTINATARIO_5, 14);
+    r_eeprom(DESTINATARIO_6, EE_DESTINATARIO_6, 14);
+    r_eeprom(DESTINATARIO_7, EE_DESTINATARIO_7, 14);
+    r_eeprom(DESTINATARIO_8, EE_DESTINATARIO_8, 14);
+    r_eeprom(DESTINATARIO_9, EE_DESTINATARIO_9, 14);
+    r_eeprom(DESTINATARIO_10,EE_DESTINATARIO_10,14);
+         unsigned char d;
+    for (d=0;d<14;d++)
+    {
+     DESTINOS[0][d]=DESTINATARIO_1[d];
+     DESTINOS[1][d]=DESTINATARIO_2[d];
+     DESTINOS[2][d]=DESTINATARIO_3[d];
+     DESTINOS[3][d]=DESTINATARIO_4[d];
+     DESTINOS[4][d]=DESTINATARIO_5[d];
+     DESTINOS[5][d]=DESTINATARIO_6[d];
+     DESTINOS[6][d]=DESTINATARIO_7[d];
+     DESTINOS[7][d]=DESTINATARIO_8[d];
+     DESTINOS[8][d]=DESTINATARIO_9[d];
+     DESTINOS[9][d]=DESTINATARIO_10[d];
+    }
+    EEPROM.write(EE_CANTIDAD_DESTINOS,48);
+    VALOR = EEPROM.read(EE_CANTIDAD_DESTINOS);
+    CANTIDAD_DESTINOS = VALOR-48;  
+    EEPROM.write(EE_OUT1_TEMPORIZADA,0);
+    EEPROM.write(EE_OUT2_TEMPORIZADA,0);
+    EEPROM.write(EE_OUT3_TEMPORIZADA,0);
+    OUT1_TEMPORIZADA = EEPROM.read(EE_OUT1_TEMPORIZADA);
+    OUT2_TEMPORIZADA = EEPROM.read(EE_OUT2_TEMPORIZADA);
+    OUT3_TEMPORIZADA = EEPROM.read(EE_OUT3_TEMPORIZADA);
+
+    EEPROM.write(EE_TIEMPO_OUT1_1,0);
+    EEPROM.write(EE_TIEMPO_OUT1_2,0);
+    EEPROM.write(EE_TIEMPO_OUT2_1,0);
+    EEPROM.write(EE_TIEMPO_OUT2_2,0);
+    EEPROM.write(EE_TIEMPO_OUT3_1,0);
+    EEPROM.write(EE_TIEMPO_OUT3_2,0);
+    
+    byte OUT1_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT1_1);
+    byte OUT1_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT1_2);
+    byte SUMA_OUT1_TIEMPO [2] = {OUT1_TIEMPO_2, OUT1_TIEMPO_1};
+    
+    TIEMPO_OUT1 = ObtenerValor(SUMA_OUT1_TIEMPO, 0);
+    
+    byte OUT2_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT2_1);
+    byte OUT2_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT2_2);
+    byte SUMA_OUT2_TIEMPO [2] = {OUT2_TIEMPO_2, OUT2_TIEMPO_1};
+    
+    TIEMPO_OUT2 = ObtenerValor(SUMA_OUT2_TIEMPO, 0);
+    
+    byte OUT3_TIEMPO_1 = EEPROM.read(EE_TIEMPO_OUT3_1);
+    byte OUT3_TIEMPO_2 = EEPROM.read(EE_TIEMPO_OUT3_2);
+    byte SUMA_OUT3_TIEMPO [2] = {OUT3_TIEMPO_2, OUT3_TIEMPO_1};
+    
+    TIEMPO_OUT3 = ObtenerValor(SUMA_OUT3_TIEMPO, 0);
+
+    EEPROM.write(154,49);
+    EEPROM.write(155,50);
+    EEPROM.write(156,51);
+    EEPROM.write(157,52);   
+    r_eeprom(CLAVE, EE_CLAVE,4);
+    CLAVE[4]=0;//le agrego un NULL para convertirlo en string
+    CLAVE_STRING = CLAVE;
+
+    EEPROM.write(EE_LONGITUD_IN1_ON,16);
+    EEPROM.write(EE_LONGITUD_IN2_ON,16);
+    EEPROM.write(EE_LONGITUD_IN1_OFF,19);
+    EEPROM.write(EE_LONGITUD_IN2_OFF,19);
+
+    EEPROM.write(158,69);//LETRA E
+    EEPROM.write(159,78);//LETRA N
+    EEPROM.write(160,84);//LETRA T
+    EEPROM.write(161,82);//LETRA R
+    EEPROM.write(162,65);//LETRA A
+    EEPROM.write(163,68);//LETRA D
+    EEPROM.write(164,65);//LETRA A
+    EEPROM.write(165,32);// ESPACIO
+    EEPROM.write(166,49);//NUMERO 1
+    EEPROM.write(167,32);//ESPACIO 
+    EEPROM.write(168,65);//LETRA A
+    EEPROM.write(169,67);//LETRA C
+    EEPROM.write(170,84);//LETRA T
+    EEPROM.write(171,73);//LETRA I
+    EEPROM.write(172,86);//LETRA V
+    EEPROM.write(173,65);//LETRA A
+
+    EEPROM.write(198,69);//LETRA E
+    EEPROM.write(199,78);//LETRA N
+    EEPROM.write(200,84);//LETRA T
+    EEPROM.write(201,82);//LETRA R
+    EEPROM.write(202,65);//LETRA A
+    EEPROM.write(203,68);//LETRA D
+    EEPROM.write(204,65);//LETRA A
+    EEPROM.write(205,32);// ESPACIO
+    EEPROM.write(206,49);//NUMERO 1
+    EEPROM.write(207,32);//ESPACIO 
+    EEPROM.write(208,68);//LETRA D
+    EEPROM.write(209,69);//LETRA E
+    EEPROM.write(210,83);//LETRA S
+    EEPROM.write(211,65);//LETRA A
+    EEPROM.write(212,67);//LETRA C
+    EEPROM.write(213,84);//LETRA T
+    EEPROM.write(214,73);//LETRA I
+    EEPROM.write(215,86);//LETRA V
+    EEPROM.write(216,65);//LETRA A
+    
+
+
+    EEPROM.write(238,69);//LETRA E
+    EEPROM.write(239,78);//LETRA N
+    EEPROM.write(240,84);//LETRA T
+    EEPROM.write(241,82);//LETRA R
+    EEPROM.write(242,65);//LETRA A
+    EEPROM.write(243,68);//LETRA D
+    EEPROM.write(244,65);//LETRA A
+    EEPROM.write(245,32);// ESPACIO
+    EEPROM.write(246,50);//NUMERO 2
+    EEPROM.write(247,32);//ESPACIO 
+    EEPROM.write(248,65);//LETRA A
+    EEPROM.write(249,67);//LETRA C
+    EEPROM.write(250,84);//LETRA T
+    EEPROM.write(251,73);//LETRA I
+    EEPROM.write(252,86);//LETRA V
+    EEPROM.write(253,65);//LETRA A
+
+    EEPROM.write(278,69);//LETRA E
+    EEPROM.write(279,78);//LETRA N
+    EEPROM.write(280,84);//LETRA T
+    EEPROM.write(281,82);//LETRA R
+    EEPROM.write(282,65);//LETRA A
+    EEPROM.write(283,68);//LETRA D
+    EEPROM.write(284,65);//LETRA A
+    EEPROM.write(285,32);// ESPACIO
+    EEPROM.write(286,50);//NUMERO 2
+    EEPROM.write(287,32);//ESPACIO 
+    EEPROM.write(288,68);//LETRA D
+    EEPROM.write(289,69);//LETRA E
+    EEPROM.write(290,83);//LETRA S
+    EEPROM.write(291,65);//LETRA A
+    EEPROM.write(292,67);//LETRA C
+    EEPROM.write(293,84);//LETRA T
+    EEPROM.write(294,73);//LETRA I
+    EEPROM.write(295,86);//LETRA V
+    EEPROM.write(296,65);//LETRA A
+
+    unsigned char Longitud_IN1_ON;
+    Longitud_IN1_ON = EEPROM.read(EE_LONGITUD_IN1_ON );
+    r_eeprom(IN1_TXT_ON, EE_TEXTO_IN1_ON, Longitud_IN1_ON );
+    IN1_TXT_ON [Longitud_IN1_ON + 1] = 0 ; //NULL
+    IN1_TXT_ON_STRING = IN1_TXT_ON;
+    
+    unsigned char Longitud_IN1_OFF;
+    Longitud_IN1_OFF = EEPROM.read(EE_LONGITUD_IN1_OFF );
+    r_eeprom(IN1_TXT_OFF,EE_TEXTO_IN1_OFF,Longitud_IN1_OFF);
+    IN1_TXT_OFF [Longitud_IN1_OFF + 1]=0; //NULL
+    IN1_TXT_OFF_STRING = IN1_TXT_OFF;
+    
+    unsigned char Longitud_IN2_ON;
+    Longitud_IN2_ON = EEPROM.read(EE_LONGITUD_IN2_ON );
+    r_eeprom(IN2_TXT_ON,EE_TEXTO_IN2_ON,Longitud_IN2_ON);
+    IN2_TXT_ON [Longitud_IN2_ON + 1]=0; //NULL
+    IN2_TXT_ON_STRING = IN2_TXT_ON;
+    
+    unsigned char Longitud_IN2_OFF;
+    Longitud_IN2_OFF = EEPROM.read(EE_LONGITUD_IN2_OFF );
+    r_eeprom(IN2_TXT_OFF,EE_TEXTO_IN2_OFF,Longitud_IN2_OFF);
+    IN2_TXT_OFF [Longitud_IN2_OFF + 1]=0; //NULL
+    IN2_TXT_OFF_STRING = IN2_TXT_OFF;
+    
+
+    
+}
+    
+}
+    Serial.println(EEPROM.read(EE_LONGITUD_IN1_OFF ));
+    
+    Serial.println(EEPROM.read(EE_LONGITUD_IN2_ON));
+
     return;
   
 }
@@ -665,6 +841,7 @@ void Programacion(void)
                   EEPROM.write(t,Recibir[t]);                                
                 }
                  Respuesta_CMD = true;   
+
             }
 
          if (Recibir.startsWith("2", 0)) // registrar destino 2
@@ -974,7 +1151,7 @@ void Programacion(void)
   }
 }
 
-void w_eeprom(unsigned char DirEE, unsigned char *pDato, unsigned char cL_CantidadDeBytes)
+void w_eeprom(unsigned int DirEE, unsigned char *pDato, unsigned char cL_CantidadDeBytes)
 {
   static unsigned char i;
   for(i=0; i<cL_CantidadDeBytes;i++)
@@ -1004,8 +1181,6 @@ void Leer_Destinos(unsigned char *pDato)
   return;
 }
 
-
-
 unsigned int ObtenerValor(byte paquete [], byte i)
 {
 
@@ -1014,38 +1189,3 @@ unsigned int ObtenerValor(byte paquete [], byte i)
   valor = (valor * 256)+ paquete [i+1];
   return valor;
 }
-
-//void Imprimir_Configuracion(void)
-//{
-//
-// Serial.print(F("========== CONFIGURACIONES DE EQUIPO GSM I/O ================="));
-// Serial.println();
-// Serial.println();
-// Serial.print(F("CLAVE CONTROL SALIDAS =    "));Serial.println(CLAVE_STRING);
-// Serial.print(F("CANTIDAD DE USUARIOS =     "));
-// Serial.print(CANTIDAD_DESTINOS);
-// Serial.println();
-// Serial.print(F("DESTINATARIO 1 =           "));Leer_Destinos(DESTINATARIO_1);
-// Serial.print(F("DESTINATARIO 2 =           "));Leer_Destinos(DESTINATARIO_2);
-// Serial.print(F("DESTINATARIO 3 =           "));Leer_Destinos(DESTINATARIO_3);
-// Serial.print(F("DESTINATARIO 4 =           "));Leer_Destinos(DESTINATARIO_4);
-// Serial.print(F("DESTINATARIO 5 =           "));Leer_Destinos(DESTINATARIO_5);
-// Serial.print(F("DESTINATARIO 6 =           "));Leer_Destinos(DESTINATARIO_6);
-// Serial.print(F("DESTINATARIO 7 =           "));Leer_Destinos(DESTINATARIO_7);
-// Serial.print(F("DESTINATARIO 8 =           "));Leer_Destinos(DESTINATARIO_8);
-// Serial.print(F("DESTINATARIO 9 =           "));Leer_Destinos(DESTINATARIO_9);
-// Serial.print(F("DESTINATARIO 10 =          "));Leer_Destinos(DESTINATARIO_10);
-// Serial.print(F("TEXTO ENT. 1 ON =          " ));Serial.println(IN1_TXT_ON_STRING);
-// Serial.print(F("TEXTO ENT. 1 OFF =         " ));Serial.println(IN1_TXT_OFF_STRING);
-// Serial.print(F("TEXTO ENT. 2 ON =          " ));Serial.println(IN2_TXT_ON_STRING);
-// Serial.print(F("TEXTO ENT. 2 OFF =         " ));Serial.println(IN2_TXT_OFF_STRING);
-// Serial.print(F("SALIDA 1 TEMPORIZADA =     " ));Serial.println(OUT1_TEMPORIZADA);
-// Serial.print(F("SALIDA 2 TEMPORIZADA =     " ));Serial.println(OUT2_TEMPORIZADA);
-// Serial.print(F("SALIDA 3 TEMPORIZADA =     " ));Serial.println(OUT3_TEMPORIZADA);
-// Serial.print(F("SALIDA 1 TIEMPO =          " ));Serial.print(TIEMPO_OUT1);Serial.print(F(" Segundos" ));
-// Serial.println();
-// Serial.print(F("SALIDA 2 TIEMPO =          " ));Serial.print(TIEMPO_OUT2);Serial.print(F(" Segundos" ));
-// Serial.println();
-// Serial.print(F("SALIDA 3 TIEMPO =          " ));Serial.print(TIEMPO_OUT3);Serial.print(F(" Segundos" ));  
-// return;
-//}
